@@ -103,6 +103,14 @@
             background: #2980b9;
         }
 
+        .btn-secondary {
+            background: #95a5a6;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
         .login-info {
             text-align: center;
             margin-top: 20px;
@@ -131,6 +139,35 @@
         @keyframes slideIn {
             from { transform: translateX(-100%); }
             to { transform: translateX(0); }
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom: 3px solid var(--secondary-color);
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         /* Dashboard Styles - Hidden by default */
@@ -447,7 +484,13 @@
             <p>موقع متخصص لتحليل فهم الذكاء الاصطناعي للهجات السعودية</p>
         </div>
         
-        <form id="loginForm">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('login')">تسجيل الدخول</div>
+            <div class="tab" onclick="switchTab('register')">إنشاء حساب</div>
+        </div>
+        
+        <!-- نموذج تسجيل الدخول -->
+        <form id="loginForm" class="tab-content active">
             <div class="form-group">
                 <label for="username">اسم المستخدم</label>
                 <input type="text" id="username" name="username" required placeholder="ادخل اسم المستخدم">
@@ -461,11 +504,25 @@
             <button type="submit" class="btn">تسجيل الدخول</button>
         </form>
 
-        <div class="login-info">
-            <strong>بيانات الدخول التجريبية:</strong><br>
-            اسم المستخدم: <strong>admin</strong><br>
-            كلمة المرور: <strong>123456</strong>
-        </div>
+        <!-- نموذج إنشاء حساب -->
+        <form id="registerForm" class="tab-content">
+            <div class="form-group">
+                <label for="newUsername">اسم المستخدم</label>
+                <input type="text" id="newUsername" name="newUsername" required placeholder="اختر اسم مستخدم">
+            </div>
+            
+            <div class="form-group">
+                <label for="newPassword">كلمة المرور</label>
+                <input type="password" id="newPassword" name="newPassword" required placeholder="اختر كلمة مرور قوية">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">تأكيد كلمة المرور</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="أعد إدخال كلمة المرور">
+            </div>
+            
+            <button type="submit" class="btn">إنشاء حساب</button>
+        </form>
     </div>
 
     <!-- لوحة التحكم -->
@@ -562,7 +619,7 @@
                                     <th>المعنى</th>
                                     <th>التصنيف</th>
                                     <th>استجابة HUMAIN</th>
-                                    <th>مستوى الفهم</th>
+                                    <th>النتيجة </th>
                                 </tr>
                             </thead>
                             <tbody id="termsTable">
@@ -603,6 +660,9 @@
     </div>
 
     <script>
+        // بيانات المستخدمين (سيتم تخزينها محلياً)
+        let users = JSON.parse(localStorage.getItem('users')) || {};
+        
         // بيانات اللهجات فارغة
         const dialectsData = {
             najdi: {
@@ -628,6 +688,20 @@
             }
         });
 
+        // تبديل بين تسجيل الدخول وإنشاء حساب
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.querySelector('.tab:nth-child(1)').classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelector('.tab:nth-child(2)').classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
+        }
+
         // تسجيل الدخول
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -635,8 +709,8 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            // بيانات تسجيل الدخول الثابتة
-            if (username === 'admin' && password === '123456') {
+            // التحقق من بيانات المستخدم
+            if (users[username] && users[username].password === password) {
                 showNotification('تم تسجيل الدخول بنجاح!', 'success');
                 localStorage.setItem('loggedIn', 'true');
                 localStorage.setItem('username', username);
@@ -649,11 +723,48 @@
             }
         });
 
+        // إنشاء حساب جديد
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // التحقق من صحة البيانات
+            if (password !== confirmPassword) {
+                showNotification('كلمات المرور غير متطابقة', 'error');
+                return;
+            }
+            
+            if (users[username]) {
+                showNotification('اسم المستخدم موجود مسبقاً', 'error');
+                return;
+            }
+            
+            // إنشاء حساب جديد
+            users[username] = {
+                password: password,
+                createdAt: new Date().toISOString()
+            };
+            
+            // حفظ بيانات المستخدمين
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            showNotification('تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن', 'success');
+            
+            // العودة إلى تسجيل الدخول
+            switchTab('login');
+            
+            // مسح حقول التسجيل
+            document.getElementById('registerForm').reset();
+        });
+
         function showDashboard() {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('dashboardPage').style.display = 'block';
             
-            const username = localStorage.getItem('username') || 'مدير النظام';
+            const username = localStorage.getItem('username') || 'مستخدم';
             document.getElementById('userWelcome').textContent = `مرحباً، ${username}`;
             
             // عرض بيانات اللهجة النجدية افتراضياً
@@ -663,6 +774,9 @@
         function showLogin() {
             document.getElementById('loginPage').style.display = 'block';
             document.getElementById('dashboardPage').style.display = 'none';
+            
+            // مسح حقول الدخول
+            document.getElementById('loginForm').reset();
         }
 
         function showDialect(dialectKey) {
