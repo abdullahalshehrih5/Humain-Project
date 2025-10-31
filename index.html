@@ -1542,10 +1542,11 @@
         throw error;
     }
 }
+<!-- باقي الصفحة هنا -->
+
 <script>
 const API_URL = "https://twilight-haze-d33b.abdullahalshehrih5-22a.workers.dev";
 
-// استرجاع آخر نسخة محفوظة عند فتح الموقع
 window.addEventListener("DOMContentLoaded", async () => {
   try {
     const res = await fetch(API_URL);
@@ -1561,7 +1562,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// دالة الحفظ التلقائي
 async function saveSite() {
   try {
     const chat = document.getElementById("chatModal");
@@ -1580,13 +1580,8 @@ async function saveSite() {
   }
 }
 
-// حفظ كل 5 ثوانٍ
 setInterval(saveSite, 5000);
+</script>
 
-
-    </script>
 </body>
-
 </html>
-
-
