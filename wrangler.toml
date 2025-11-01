@@ -1,0 +1,7 @@
+name = "twilight-haze-d33b"
+main = "worker.js"
+compatibility_date = "2025-11-01"
+
+kv_namespaces = [
+  { binding = "HUMAIN_DATA", id = "979fdfba036443c484c86f543106e88a" }
+]
