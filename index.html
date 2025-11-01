@@ -16,10 +16,6 @@
             --white: #ffffff;
             --border-radius: 8px;
             --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --dark-bg: #1a1a1a;
-            --dark-card: #2d2d2d;
-            --dark-text: #e0e0e0;
-            --dark-border: #444;
         }
 
         * {
@@ -27,7 +23,6 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
         body {
@@ -40,11 +35,6 @@
             direction: rtl;
         }
 
-        body.dark-mode {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: var(--dark-text);
-        }
-
         .login-container {
             background: var(--white);
             padding: 40px;
@@ -52,11 +42,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 400px;
-        }
-
-        .dark-mode .login-container {
-            background: var(--dark-card);
-            color: var(--dark-text);
         }
 
         .logo {
@@ -70,17 +55,9 @@
             margin-bottom: 10px;
         }
 
-        .dark-mode .logo h1 {
-            color: var(--secondary-color);
-        }
-
         .logo p {
             color: #666;
             font-size: 14px;
-        }
-
-        .dark-mode .logo p {
-            color: #aaa;
         }
 
         .form-group {
@@ -94,10 +71,6 @@
             font-weight: 600;
         }
 
-        .dark-mode .form-group label {
-            color: var(--dark-text);
-        }
-
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 12px;
@@ -105,16 +78,6 @@
             border-radius: var(--border-radius);
             font-size: 16px;
             transition: border-color 0.3s ease;
-            background: var(--white);
-            color: var(--text-color);
-        }
-
-        .dark-mode .form-group input,
-        .dark-mode .form-group select,
-        .dark-mode .form-group textarea {
-            background: #3a3a3a;
-            border-color: #555;
-            color: var(--dark-text);
         }
 
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
@@ -174,11 +137,6 @@
             color: #666;
         }
 
-        .dark-mode .login-info {
-            background: #3a3a3a;
-            color: #aaa;
-        }
-
         .notification {
             position: fixed;
             top: 20px;
@@ -205,10 +163,6 @@
             border-bottom: 1px solid #ddd;
         }
 
-        .dark-mode .tabs {
-            border-bottom-color: #555;
-        }
-
         .tab {
             flex: 1;
             text-align: center;
@@ -222,10 +176,6 @@
             border-bottom: 3px solid var(--secondary-color);
             color: var(--secondary-color);
             font-weight: bold;
-        }
-
-        .dark-mode .tab.active {
-            color: var(--secondary-color);
         }
 
         .tab-content {
@@ -244,11 +194,6 @@
             background-color: var(--light-bg);
         }
 
-        .dark-mode .dashboard {
-            background-color: var(--dark-bg);
-            color: var(--dark-text);
-        }
-
         .navbar {
             background: var(--white);
             box-shadow: var(--box-shadow);
@@ -257,11 +202,6 @@
             width: 100%;
             top: 0;
             z-index: 1000;
-        }
-
-        .dark-mode .navbar {
-            background: var(--dark-card);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .nav-container {
@@ -276,10 +216,6 @@
         .nav-logo h1 {
             color: var(--primary-color);
             font-size: 20px;
-        }
-
-        .dark-mode .nav-logo h1 {
-            color: var(--dark-text);
         }
 
         .nav-user {
@@ -303,32 +239,6 @@
             background: #c0392b;
         }
 
-        .theme-toggle {
-            background: none;
-            border: 2px solid var(--secondary-color);
-            color: var(--secondary-color);
-            padding: 8px 16px;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .theme-toggle:hover {
-            background: var(--secondary-color);
-            color: white;
-        }
-
-        .dark-mode .theme-toggle {
-            border-color: var(--warning-color);
-            color: var(--warning-color);
-        }
-
-        .dark-mode .theme-toggle:hover {
-            background: var(--warning-color);
-            color: var(--dark-bg);
-        }
-
         .main-content {
             margin-top: 70px;
             padding: 20px;
@@ -346,10 +256,6 @@
             border-radius: var(--border-radius);
             margin-bottom: 30px;
             text-align: center;
-        }
-
-        .dark-mode .welcome-section {
-            background: linear-gradient(135deg, #374151, #4b5563);
         }
 
         .welcome-section h1 {
@@ -373,11 +279,6 @@
             transition: transform 0.3s ease;
         }
 
-        .dark-mode .stat-card {
-            background: var(--dark-card);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-
         .stat-card:hover {
             transform: translateY(-5px);
         }
@@ -389,10 +290,6 @@
             margin: 10px 0;
         }
 
-        .dark-mode .stat-number {
-            color: var(--secondary-color);
-        }
-
         .add-term-section {
             background: var(--white);
             padding: 30px;
@@ -400,11 +297,6 @@
             box-shadow: var(--box-shadow);
             margin-bottom: 30px;
             position: relative;
-        }
-
-        .dark-mode .add-term-section {
-            background: var(--dark-card);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
         .form-row {
@@ -468,22 +360,12 @@
             margin-bottom: 30px;
         }
 
-        .dark-mode .dialects-section {
-            background: var(--dark-card);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-
         .section-title {
             color: var(--primary-color);
             margin-bottom: 20px;
             font-size: 24px;
             border-bottom: 2px solid var(--secondary-color);
             padding-bottom: 10px;
-        }
-
-        .dark-mode .section-title {
-            color: var(--dark-text);
-            border-bottom-color: var(--secondary-color);
         }
 
         .dialects-grid {
@@ -501,19 +383,10 @@
             background: var(--white);
         }
 
-        .dark-mode .dialect-card {
-            background: var(--dark-card);
-            border-color: #555;
-        }
-
         .dialect-card:hover {
             transform: translateY(-5px);
             border-color: var(--secondary-color);
             box-shadow: var(--box-shadow);
-        }
-
-        .dark-mode .dialect-card:hover {
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
         .dialect-card.active {
@@ -521,18 +394,9 @@
             background: #e3f2fd;
         }
 
-        .dark-mode .dialect-card.active {
-            background: #1e3a5f;
-            border-color: var(--secondary-color);
-        }
-
         .dialect-card h3 {
             color: var(--primary-color);
             margin-bottom: 10px;
-        }
-
-        .dark-mode .dialect-card h3 {
-            color: var(--dark-text);
         }
 
         .dialect-stats {
@@ -543,10 +407,6 @@
             border-top: 1px solid #eee;
         }
 
-        .dark-mode .dialect-stats {
-            border-top-color: #555;
-        }
-
         .dialect-stats span {
             background: var(--light-bg);
             padding: 5px 10px;
@@ -555,22 +415,12 @@
             font-weight: 600;
         }
 
-        .dark-mode .dialect-stats span {
-            background: #3a3a3a;
-            color: var(--dark-text);
-        }
-
         .terms-table {
             background: var(--white);
             padding: 30px;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             margin-bottom: 30px;
-        }
-
-        .dark-mode .terms-table {
-            background: var(--dark-card);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
         .table-container {
@@ -590,11 +440,6 @@
             border-bottom: 1px solid #eee;
         }
 
-        .dark-mode th, .dark-mode td {
-            border-bottom-color: #555;
-            color: var(--dark-text);
-        }
-
         th {
             background: var(--light-bg);
             color: var(--primary-color);
@@ -603,17 +448,8 @@
             top: 0;
         }
 
-        .dark-mode th {
-            background: #3a3a3a;
-            color: var(--dark-text);
-        }
-
         tr:hover {
             background: #f8f9fa;
-        }
-
-        .dark-mode tr:hover {
-            background: #3a3a3a;
         }
 
         .understanding-badge {
@@ -668,11 +504,6 @@
             margin-bottom: 30px;
         }
 
-        .dark-mode .charts-section {
-            background: var(--dark-card);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -685,11 +516,6 @@
             padding: 20px;
             border-radius: var(--border-radius);
             border: 1px solid #ddd;
-        }
-
-        .dark-mode .chart-card {
-            background: #3a3a3a;
-            border-color: #555;
         }
 
         .chart-placeholder {
@@ -707,12 +533,6 @@
             line-height: 1.6;
         }
 
-        .dark-mode .chart-placeholder {
-            background: #2d2d2d;
-            color: #aaa;
-            border-color: #555;
-        }
-
         .progress-bar {
             width: 100%;
             height: 20px;
@@ -720,10 +540,6 @@
             border-radius: 10px;
             overflow: hidden;
             margin: 10px 0;
-        }
-
-        .dark-mode .progress-bar {
-            background: #3a3a3a;
         }
 
         .progress-fill {
@@ -741,10 +557,6 @@
             padding: 40px;
             color: #666;
             font-size: 16px;
-        }
-
-        .dark-mode .empty-table-message {
-            color: #aaa;
         }
 
         /* Chat Modal Styles */
@@ -776,10 +588,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .dark-mode .chat-container {
-            background: var(--dark-card);
-        }
-
         .chat-header {
             padding: 20px;
             border-bottom: 1px solid #eee;
@@ -789,11 +597,6 @@
             background: var(--primary-color);
             color: var(--white);
             border-radius: var(--border-radius) var(--border-radius) 0 0;
-        }
-
-        .dark-mode .chat-header {
-            background: #374151;
-            border-bottom-color: #555;
         }
 
         .chat-header h3 {
@@ -838,20 +641,11 @@
             border-bottom-left-radius: 4px;
         }
 
-        .dark-mode .ai-message {
-            background: #3a3a3a;
-            color: var(--dark-text);
-        }
-
         .chat-input {
             padding: 20px;
             border-top: 1px solid #eee;
             display: flex;
             gap: 10px;
-        }
-
-        .dark-mode .chat-input {
-            border-top-color: #555;
         }
 
         .chat-input input {
@@ -860,14 +654,6 @@
             border: 2px solid #ddd;
             border-radius: var(--border-radius);
             font-size: 16px;
-            background: var(--white);
-            color: var(--text-color);
-        }
-
-        .dark-mode .chat-input input {
-            background: #3a3a3a;
-            border-color: #555;
-            color: var(--dark-text);
         }
 
         .chat-input button {
@@ -914,11 +700,6 @@
             border-radius: 18px;
             border-bottom-left-radius: 4px;
             font-style: italic;
-        }
-
-        .dark-mode .typing-indicator {
-            background: #3a3a3a;
-            color: #aaa;
         }
 
         .typing-indicator.active {
@@ -1025,7 +806,6 @@
                 <div class="nav-user">
                     <span id="userWelcome">مرحباً، مدير النظام</span>
                     <button class="ai-chat-btn" onclick="openChat()">محادثة مع الذكاء الاصطناعي</button>
-                    <button class="theme-toggle" id="themeToggle">🌙 وضع الليل</button>
                     <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
                 </div>
             </div>
@@ -1103,6 +883,7 @@
                             </div>
                         </div>
                         <div class="form-actions">
+                            <button type="button" class="btn btn-warning" onclick="clearForm()">مسح النموذج</button>
                             <button type="button" class="restore-draft-btn" id="restoreDraftBtn" style="display:none;" onclick="restoreDraft()">استعادة المسودة</button>
                             <button type="submit" class="btn btn-success" id="submitBtn">إضافة المصطلح</button>
                         </div>
@@ -1246,15 +1027,11 @@
             }
         };
 
-        // رابط السيرفر للمزامنة
-        const SERVER_URL = "https://twilight-haze-d33b.abdullahalshehrih5-22a.workers.dev";
-
         // المتغيرات للتحكم في التعديل
         let editingTermId = null;
         let currentDialect = 'najdi';
         let autoSaveTimer = null;
         let hasUnsavedChanges = false;
-        let serverSyncTimer = null;
 
         // التحقق من حالة الدخول عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
@@ -1282,225 +1059,7 @@
             
             // محاولة استعادة المسودة المحفوظة
             restoreDraftOnLoad();
-            
-            // بدء مزامنة السيرفر
-            startServerSync();
-
-            // تهيئة وضع الدارك مود
-            initDarkMode();
         });
-
-        // ========== وضع الدارك مود ==========
-
-        function initDarkMode() {
-            const isDarkMode = localStorage.getItem('darkMode') === 'true';
-            if (isDarkMode) {
-                document.body.classList.add('dark-mode');
-                document.getElementById('themeToggle').textContent = '☀️ وضع النهار';
-            }
-
-            document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
-        }
-
-        function toggleDarkMode() {
-            const body = document.body;
-            const themeToggle = document.getElementById('themeToggle');
-            
-            body.classList.toggle('dark-mode');
-            
-            if (body.classList.contains('dark-mode')) {
-                themeToggle.textContent = '☀️ وضع النهار';
-                localStorage.setItem('darkMode', 'true');
-            } else {
-                themeToggle.textContent = '🌙 وضع الليل';
-                localStorage.setItem('darkMode', 'false');
-            }
-        }
-
-        // ========== مزامنة السيرفر ==========
-
-        // استرجاع البيانات المحفوظة من السيرفر
-        async function loadFromServer() {
-            try {
-                console.log("🔄 جاري تحميل البيانات من السيرفر...");
-                const res = await fetch(SERVER_URL);
-                
-                if (!res.ok) {
-                    throw new Error(`خطأ في السيرفر: ${res.status}`);
-                }
-                
-                const data = await res.json();
-                
-                // التحقق من وجود بيانات صالحة
-                if (data && Object.keys(data).length > 0 && 
-                    (data.najdi || data.northern || data.southern)) {
-                    
-                    dialectsData = data;
-                    localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
-                    updateStatistics();
-                    showDialect(currentDialect);
-                    
-                    console.log("✅ تم تحميل البيانات من السيرفر بنجاح");
-                } else {
-                    console.log("ℹ️ لا توجد بيانات على السيرفر أو البيانات غير صالحة");
-                }
-            } catch (e) {
-                console.warn("⚠️ فشل التحميل من السيرفر:", e.message);
-            }
-        }
-
-        // حفظ البيانات إلى السيرفر
-        async function saveToServer() {
-            try {
-                console.log("🔄 جاري حفظ البيانات إلى السيرفر...");
-                const res = await fetch(SERVER_URL, {
-                    method: "POST",
-                    headers: { 
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify({ content: dialectsData })
-                });
-                
-                if (!res.ok) {
-                    throw new Error(`خطأ في السيرفر: ${res.status}`);
-                }
-                
-                const result = await res.json();
-                console.log("💾 تم الحفظ إلى السيرفر:", result);
-                
-            } catch (e) {
-                console.warn("⚠️ فشل الحفظ إلى السيرفر:", e.message);
-            }
-        }
-
-        // بدء المزامنة التلقائية مع السيرفر
-        function startServerSync() {
-            // تحميل البيانات من السيرفر عند البدء
-            loadFromServer();
-            
-            // الحفظ التلقائي كل 10 ثواني
-            serverSyncTimer = setInterval(saveToServer, 10000);
-            
-            // أيضًا حفظ عند إضافة أو تعديل مصطلح
-            document.addEventListener('termChanged', saveToServer);
-        }
-
-        // ========== تعديل الوظائف الحالية ==========
-
-        // وظيفة إضافة مصطلح جديد
-        function addNewTerm() {
-            const form = document.getElementById('addTermForm');
-            const formData = new FormData(form);
-            
-            const newTerm = {
-                id: Date.now().toString(),
-                term: formData.get('term'),
-                meaning: formData.get('meaning'),
-                dialect: formData.get('dialect'),
-                category: formData.get('category'),
-                response: formData.get('aiResponse'),
-                understanding: formData.get('understanding')
-            };
-            
-            // إضافة المصطلح إلى البيانات
-            dialectsData[newTerm.dialect].terms.push(newTerm);
-            
-            // حفظ البيانات محلياً
-            saveDialectsData();
-            
-            // تحديث الواجهة
-            updateStatistics();
-            showDialect(currentDialect);
-            
-            // إعادة تعيين النموذج
-            clearForm();
-            
-            // إشعار بتغيير المصطلح للمزامنة
-            document.dispatchEvent(new Event('termChanged'));
-            
-            // إظهار إشعار النجاح
-            showNotification('تم إضافة المصطلح بنجاح', 'success');
-        }
-
-        // وظيفة تحديث مصطلح موجود
-        function updateTerm() {
-            const form = document.getElementById('addTermForm');
-            const formData = new FormData(form);
-            
-            // البحث عن المصطلح وتحديثه
-            const dialect = formData.get('dialect');
-            const termIndex = dialectsData[dialect].terms.findIndex(term => term.id === editingTermId);
-            
-            if (termIndex !== -1) {
-                dialectsData[dialect].terms[termIndex] = {
-                    id: editingTermId,
-                    term: formData.get('term'),
-                    meaning: formData.get('meaning'),
-                    dialect: dialect,
-                    category: formData.get('category'),
-                    response: formData.get('aiResponse'),
-                    understanding: formData.get('understanding')
-                };
-                
-                // حفظ البيانات محلياً
-                saveDialectsData();
-                
-                // تحديث الواجهة
-                updateStatistics();
-                showDialect(currentDialect);
-                
-                // إعادة تعيين النموذج
-                clearForm();
-                
-                // إشعار بتغيير المصطلح للمزامنة
-                document.dispatchEvent(new Event('termChanged'));
-                
-                // إظهار إشعار النجاح
-                showNotification('تم تحديث المصطلح بنجاح', 'success');
-            }
-        }
-
-        // وظيفة حذف مصطلح
-        function deleteTerm(termId, dialect) {
-            if (confirm('هل أنت متأكد من حذف هذا المصطلح؟')) {
-                // البحث عن المصطلح وحذفه
-                dialectsData[dialect].terms = dialectsData[dialect].terms.filter(term => term.id !== termId);
-                
-                // حفظ البيانات محلياً
-                saveDialectsData();
-                
-                // تحديث الواجهة
-                updateStatistics();
-                showDialect(currentDialect);
-                
-                // إشعار بتغيير المصطلح للمزامنة
-                document.dispatchEvent(new Event('termChanged'));
-                
-                // إظهار إشعار النجاح
-                showNotification('تم حذف المصطلح بنجاح', 'success');
-            }
-        }
-
-        // وظيفة حفظ بيانات اللهجات محلياً
-        function saveDialectsData() {
-            localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
-        }
-
-        // وظيفة تحميل بيانات اللهجات محلياً
-        function loadDialectsData() {
-            const savedData = localStorage.getItem('dialectsData');
-            if (savedData) {
-                try {
-                    dialectsData = JSON.parse(savedData);
-                    updateStatistics();
-                } catch (e) {
-                    console.error('خطأ في تحميل البيانات المحلية:', e);
-                }
-            }
-        }
-
-        // ========== وظائف الحفظ التلقائي للمسودات ==========
 
         // إعداد الحفظ التلقائي
         function setupAutoSave() {
@@ -1516,10 +1075,12 @@
 
         // جدولة الحفظ التلقائي
         function scheduleAutoSave() {
+            // إلغاء المؤقت السابق إذا كان موجوداً
             if (autoSaveTimer) {
                 clearTimeout(autoSaveTimer);
             }
             
+            // جدولة الحفظ بعد 2 ثانية من آخر تعديل
             autoSaveTimer = setTimeout(() => {
                 saveDraft();
             }, 2000);
@@ -1538,6 +1099,7 @@
                 understanding: document.getElementById('understanding').value
             };
             
+            // التحقق إذا كان هناك بيانات للحفظ
             const hasData = Object.values(formData).some(value => value.trim() !== '');
             
             if (hasData) {
@@ -1583,22 +1145,98 @@
             }, 2000);
         }
 
-        // وظيفة مسح النموذج
-        function clearForm() {
-            document.getElementById('addTermForm').reset();
-            editingTermId = null;
-            document.getElementById('submitBtn').textContent = 'إضافة المصطلح';
+        // وظيفة إضافة مصطلح جديد
+        function addNewTerm() {
+            const form = document.getElementById('addTermForm');
+            const formData = new FormData(form);
             
-            localStorage.removeItem('termDraft');
-            document.getElementById('restoreDraftBtn').style.display = 'none';
-            hasUnsavedChanges = false;
+            const newTerm = {
+                id: Date.now().toString(),
+                term: formData.get('term'),
+                meaning: formData.get('meaning'),
+                dialect: formData.get('dialect'),
+                category: formData.get('category'),
+                response: formData.get('aiResponse'),
+                understanding: formData.get('understanding')
+            };
+            
+            // إضافة المصطلح إلى البيانات
+            dialectsData[newTerm.dialect].terms.push(newTerm);
+            
+            // حفظ البيانات
+            saveDialectsData();
+            
+            // تحديث الواجهة
+            updateStatistics();
+            showDialect(currentDialect);
+            
+            // إعادة تعيين النموذج
+            clearForm();
+            
+            // إظهار إشعار النجاح
+            showNotification('تم إضافة المصطلح بنجاح', 'success');
+        }
+
+        // وظيفة تحديث مصطلح موجود
+        function updateTerm() {
+            const form = document.getElementById('addTermForm');
+            const formData = new FormData(form);
+            
+            // البحث عن المصطلح وتحديثه
+            const dialect = formData.get('dialect');
+            const termIndex = dialectsData[dialect].terms.findIndex(term => term.id === editingTermId);
+            
+            if (termIndex !== -1) {
+                dialectsData[dialect].terms[termIndex] = {
+                    id: editingTermId,
+                    term: formData.get('term'),
+                    meaning: formData.get('meaning'),
+                    dialect: dialect,
+                    category: formData.get('category'),
+                    response: formData.get('aiResponse'),
+                    understanding: formData.get('understanding')
+                };
+                
+                // حفظ البيانات
+                saveDialectsData();
+                
+                // تحديث الواجهة
+                updateStatistics();
+                showDialect(currentDialect);
+                
+                // إعادة تعيين النموذج
+                clearForm();
+                
+                // إظهار إشعار النجاح
+                showNotification('تم تحديث المصطلح بنجاح', 'success');
+            }
+        }
+
+        // وظيفة حذف مصطلح
+        function deleteTerm(termId, dialect) {
+            if (confirm('هل أنت متأكد من حذف هذا المصطلح؟')) {
+                // البحث عن المصطلح وحذفه
+                dialectsData[dialect].terms = dialectsData[dialect].terms.filter(term => term.id !== termId);
+                
+                // حفظ البيانات
+                saveDialectsData();
+                
+                // تحديث الواجهة
+                updateStatistics();
+                showDialect(currentDialect);
+                
+                // إظهار إشعار النجاح
+                showNotification('تم حذف المصطلح بنجاح', 'success');
+            }
         }
 
         // وظيفة تعديل مصطلح
         function editTerm(termId, dialect) {
+            // البحث عن المصطلح
             const term = dialectsData[dialect].terms.find(term => term.id === termId);
             
             if (term) {
+                // تعبئة النموذج بقيم المصطلح
                 document.getElementById('term').value = term.term;
                 document.getElementById('meaning').value = term.meaning;
                 document.getElementById('dialect').value = term.dialect;
@@ -1606,31 +1244,66 @@
                 document.getElementById('aiResponse').value = term.response;
                 document.getElementById('understanding').value = term.understanding;
                 
+                // تعيين حالة التعديل
                 editingTermId = termId;
+                
+                // تغيير نص زر الإرسال
                 document.getElementById('submitBtn').textContent = 'تحديث المصطلح';
                 
+                // التمرير إلى قسم الإضافة
                 document.querySelector('.add-term-section').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // وظيفة مسح النموذج
+        function clearForm() {
+            document.getElementById('addTermForm').reset();
+            editingTermId = null;
+            document.getElementById('submitBtn').textContent = 'إضافة المصطلح';
+            
+            // مسح المسودة المحفوظة
+            localStorage.removeItem('termDraft');
+            document.getElementById('restoreDraftBtn').style.display = 'none';
+            hasUnsavedChanges = false;
+        }
+
+        // وظيفة حفظ بيانات اللهجات
+        function saveDialectsData() {
+            localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
+        }
+
+        // وظيفة تحميل بيانات اللهجات
+        function loadDialectsData() {
+            const savedData = localStorage.getItem('dialectsData');
+            if (savedData) {
+                dialectsData = JSON.parse(savedData);
+                updateStatistics();
             }
         }
 
         // وظيفة تحديث الإحصائيات
         function updateStatistics() {
+            // حساب الإحصائيات العامة
             let totalTerms = 0;
             let totalUnderstood = 0;
             let totalPartial = 0;
             let totalNotUnderstood = 0;
             
+            // حساب إحصائيات كل لهجة
             Object.keys(dialectsData).forEach(dialectKey => {
                 const dialect = dialectsData[dialectKey];
                 const termsCount = dialect.terms.length;
                 
+                // حساب نسبة الفهم
                 const understoodCount = dialect.terms.filter(term => term.understanding === 'understood').length;
                 const partialCount = dialect.terms.filter(term => term.understanding === 'partial').length;
                 const notUnderstoodCount = dialect.terms.filter(term => term.understanding === 'not-understood').length;
                 
+                // حساب نسبة الفهم الإجمالية (مفهوم + نصف فهم جزئي)
                 const understandingPercentage = termsCount > 0 ? 
                     Math.round(((understoodCount + (partialCount * 0.5)) / termsCount) * 100) : 0;
                 
+                // تحديث بطاقة اللهجة
                 const statsElement = document.getElementById(`${dialectKey}Stats`);
                 const progressElement = document.getElementById(`${dialectKey}Progress`);
                 
@@ -1645,18 +1318,21 @@
                     progressElement.style.width = `${understandingPercentage}%`;
                 }
                 
+                // تحديث الإحصائيات العامة
                 totalTerms += termsCount;
                 totalUnderstood += understoodCount;
                 totalPartial += partialCount;
                 totalNotUnderstood += notUnderstoodCount;
             });
             
+            // حساب النسب العامة
             const totalUnderstandingPercentage = totalTerms > 0 ? 
                 Math.round(((totalUnderstood + (totalPartial * 0.5)) / totalTerms) * 100) : 0;
             
             const errorRate = totalTerms > 0 ? 
                 Math.round((totalNotUnderstood / totalTerms) * 100) : 0;
             
+            // تحديث شبكة الإحصائيات
             const statsGrid = document.getElementById('statsGrid');
             statsGrid.innerHTML = `
                 <div class="stat-card">
@@ -1676,11 +1352,13 @@
                 </div>
             `;
             
+            // تحديث المخططات
             updateCharts();
         }
 
         // وظيفة تحديث المخططات
         function updateCharts() {
+            // مخطط توزيع مستوى الفهم
             let understoodCount = 0;
             let partialCount = 0;
             let notUnderstoodCount = 0;
@@ -1714,6 +1392,7 @@
                 `;
             }
             
+            // مخطط مقارنة اللهجات
             const dialectsComparisonChart = document.getElementById('dialectsComparisonChart');
             let comparisonHTML = '<div style="display: flex; flex-direction: column; gap: 15px; height: 100%; justify-content: center;">';
             
@@ -1744,10 +1423,11 @@
             dialectsComparisonChart.innerHTML = comparisonHTML;
         }
 
-        // وظيفة showDialect
+        // وظيفة showDialect المعدلة
         function showDialect(dialectKey) {
             currentDialect = dialectKey;
             
+            // تحديث البطاقات النشطة
             document.querySelectorAll('.dialect-card').forEach(card => {
                 card.classList.remove('active');
             });
@@ -1757,9 +1437,13 @@
             const tableBody = document.getElementById('termsTable');
             const tableTitle = document.getElementById('tableTitle');
             
+            // تحديث عنوان الجدول
             tableTitle.textContent = `المصطلحات ونتائج الفهم - ${dialect.name}`;
+            
+            // تفريغ الجدول
             tableBody.innerHTML = '';
             
+            // التحقق إذا كانت هناك بيانات
             if (dialect.terms.length === 0) {
                 const emptyRow = document.createElement('tr');
                 emptyRow.innerHTML = `
@@ -1769,6 +1453,7 @@
                 `;
                 tableBody.appendChild(emptyRow);
             } else {
+                // ملء الجدول بالبيانات
                 dialect.terms.forEach(term => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -1791,7 +1476,7 @@
             }
         }
 
-        // بقية الوظائف تبقى كما هي...
+        // باقي الوظائف تبقى كما هي
         function getUnderstandingText(level) {
             const levels = {
                 'understood': 'مفهوم',
@@ -1801,7 +1486,7 @@
             return levels[level] || level;
         }
 
-        // وظائف تسجيل الدخول والمحادثة تبقى كما هي...
+        // وظائف تسجيل الدخول والمحادثة تبقى كما هي
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1822,6 +1507,7 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
+            // التحقق من بيانات المستخدم
             if (users[username] && users[username].password === password) {
                 showNotification('تم تسجيل الدخول بنجاح!', 'success');
                 localStorage.setItem('loggedIn', 'true');
@@ -1843,6 +1529,7 @@
             const password = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
+            // التحقق من صحة البيانات
             if (password !== confirmPassword) {
                 showNotification('كلمات المرور غير متطابقة', 'error');
                 return;
@@ -1853,14 +1540,21 @@
                 return;
             }
             
+            // إنشاء حساب جديد
             users[username] = {
                 password: password,
                 createdAt: new Date().toISOString()
             };
             
+            // حفظ بيانات المستخدمين
             localStorage.setItem('users', JSON.stringify(users));
+            
             showNotification('تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن', 'success');
+            
+            // العودة إلى تسجيل الدخول
             switchTab('login');
+            
+            // مسح حقول التسجيل
             document.getElementById('registerForm').reset();
         });
 
@@ -1871,12 +1565,15 @@
             const username = localStorage.getItem('username') || 'مستخدم';
             document.getElementById('userWelcome').textContent = `مرحباً، ${username}`;
             
+            // عرض بيانات اللهجة النجدية افتراضياً
             showDialect('najdi');
         }
 
         function showLogin() {
             document.getElementById('loginPage').style.display = 'block';
             document.getElementById('dashboardPage').style.display = 'none';
+            
+            // مسح حقول الدخول
             document.getElementById('loginForm').reset();
         }
 
@@ -1888,6 +1585,7 @@
         }
 
         function showNotification(message, type) {
+            // إزالة أي إشعارات سابقة
             const oldNotification = document.querySelector('.notification');
             if (oldNotification) {
                 oldNotification.remove();
@@ -1925,23 +1623,30 @@
             
             if (!message) return;
             
+            // إضافة رسالة المستخدم
             addMessageToChat(message, 'user');
             input.value = '';
             
+            // إظهار مؤشر الكتابة
             document.getElementById('typingIndicator').classList.add('active');
             document.getElementById('sendBtn').disabled = true;
             
             try {
+                // إرسال الرسالة إلى الذكاء الاصطناعي
                 const response = await sendToAI(message);
                 
+                // إخفاء مؤشر الكتابة
                 document.getElementById('typingIndicator').classList.remove('active');
                 document.getElementById('sendBtn').disabled = false;
                 
+                // إضافة رد الذكاء الاصطناعي
                 addMessageToChat(response, 'ai');
             } catch (error) {
+                // إخفاء مؤشر الكتابة
                 document.getElementById('typingIndicator').classList.remove('active');
                 document.getElementById('sendBtn').disabled = false;
                 
+                // إضافة رسالة خطأ
                 addMessageToChat('عذراً، حدث خطأ في الاتصال بالذكاء الاصطناعي. يرجى المحاولة مرة أخرى.', 'ai');
                 console.error('Error communicating with AI:', error);
             }
@@ -1954,13 +1659,14 @@
             messageElement.textContent = message;
             chatMessages.appendChild(messageElement);
             
+            // التمرير إلى الأسفل
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         // الدالة المعدلة للاتصال المباشر بالAPI
         async function sendToAI(prompt) {
             try {
-                const response = await fetch("http://localhost:5000/chat", {
+                const response = await fetch("https://twilight-haze-d33b.abdullahalshehrih5-22a.workers.dev", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
