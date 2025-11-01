@@ -136,14 +136,6 @@
             background: #219653;
         }
 
-        .btn-warning {
-            background: var(--warning-color);
-        }
-
-        .btn-warning:hover {
-            background: #e67e22;
-        }
-
         .notification {
             position: fixed;
             top: 20px;
@@ -987,6 +979,7 @@
                     const data = await response.json();
                     if (data && Object.keys(data).length > 0) {
                         dialectsData = data;
+                        showNotification('تم تحميل البيانات بنجاح', 'success');
                     }
                 } else {
                     throw new Error('فشل في جلب البيانات من السيرفر');
