@@ -1332,7 +1332,7 @@
         // وظيفة حفظ بيانات اللهجات في KV
         async function saveDialectsData() {
             try {
-                const response = await fetch('https://twilight-haze-d33b.abdullahalshehrih5-22a.workers.dev', {
+                const response = await fetch('https://twilight-haze-d33b.abdullahalshehrih5-22a.workers.dev/get', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1360,7 +1360,7 @@
         // وظيفة تحميل بيانات اللهجات من KV
         async function loadDialectsData() {
             try {
-                const response = await fetch('https://your-worker-url.workers.dev/get');
+                const response = await fetch('https://twilight-haze-d33b.abdullahalshehrih5-22a.workers.dev/get');
                 
                 if (response.ok) {
                     const data = await response.json();
