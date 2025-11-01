@@ -459,9 +459,7 @@
             border-radius: var(--border-radius);
             font-size: 12px;
             z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            display: none;
         }
 
         .sync-status.syncing {
@@ -1139,7 +1137,6 @@
                             </div>
                         </div>
                         <div class="form-actions">
-                            <button type="button" class="btn btn-warning" onclick="clearForm()">مسح النموذج</button>
                             <button type="button" class="restore-draft-btn" id="restoreDraftBtn" style="display:none;" onclick="restoreDraft()">استعادة المسودة</button>
                             <button type="submit" class="btn btn-success" id="submitBtn">إضافة المصطلح</button>
                         </div>
@@ -1311,6 +1308,8 @@
         let lastSyncData = '';
         let isUsingBackup = false;
         let currentDeviceId = '';
+        let lastNotificationTime = 0;
+        const NOTIFICATION_COOLDOWN = 5000; // 5 ثواني بين الإشعارات
 
         // ========== نظام Dark Mode ==========
 
@@ -1338,7 +1337,7 @@
             themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
         }
 
-        // ========== نظام المزامنة بين الأجهزة ==========
+        // ========== نظام المزامنة بين الأجهزة - الإصدار المصحح ==========
 
         // توليد معرف فريد للجهاز
         function getDeviceId() {
@@ -1358,7 +1357,8 @@
                 loggedIn: localStorage.getItem('loggedIn'),
                 username: localStorage.getItem('username'),
                 deviceId: currentDeviceId,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                version: '1.0'
             };
         }
 
@@ -1379,23 +1379,19 @@
                     // استخدام البيانات الأحدث
                     if (serverTime > localTime) {
                         console.log("📥 استخدام البيانات من السيرفر (أحدث)");
-                        showDeviceSyncInfo('تم تحديث البيانات من جهاز آخر');
                         applyServerData(serverData);
                     } else {
                         console.log("📤 رفع البيانات المحلية إلى السيرفر (أحدث)");
-                        showDeviceSyncInfo('جاري مزامنة البيانات مع الأجهزة الأخرى');
                         await saveToServer();
                     }
                 } else {
                     // لا توجد بيانات على السيرفر، رفع البيانات المحلية
                     console.log("📤 رفع البيانات المحلية إلى السيرفر (أول مرة)");
-                    showDeviceSyncInfo('جاري رفع البيانات للسيرفر');
                     await saveToServer();
                 }
                 
             } catch (error) {
                 console.error("❌ فشل مزامنة البيانات بين الأجهزة:", error);
-                showDeviceSyncInfo('فشل المزامنة بين الأجهزة');
             }
         }
 
@@ -1408,7 +1404,7 @@
                     return data.content;
                 }
             } catch (error) {
-                console.warn("⚠️ فشل جلب البيانات من السيرفر:", error);
+                console.warn("⚠️ فشل جلب البيانات من السيرفر");
             }
             return null;
         }
@@ -1432,17 +1428,6 @@
             }
         }
 
-        // عرض معلومات مزامنة الأجهزة
-        function showDeviceSyncInfo(message) {
-            const deviceInfo = document.getElementById('deviceSyncInfo');
-            deviceInfo.innerHTML = `<span>📱 ${message}</span>`;
-            deviceInfo.classList.add('show');
-            
-            setTimeout(() => {
-                deviceInfo.classList.remove('show');
-            }, 5000);
-        }
-
         // ========== نظام المزامنة المُحسّن مع النسخ الاحتياطي ==========
 
         // تحديث حالة المزامنة
@@ -1453,6 +1438,7 @@
             
             switch(status) {
                 case 'syncing':
+                    syncStatus.style.display = 'flex';
                     syncStatus.classList.add('syncing');
                     syncStatus.innerHTML = '🔄 جاري المزامنة...';
                     break;
@@ -1462,17 +1448,21 @@
                     isUsingBackup = false;
                     setTimeout(() => {
                         syncStatus.style.display = 'none';
-                    }, 3000);
+                    }, 2000);
                     break;
                 case 'error':
+                    syncStatus.style.display = 'flex';
                     syncStatus.classList.add('error');
                     syncStatus.innerHTML = '❌ خطأ في المزامنة';
+                    setTimeout(() => {
+                        syncStatus.style.display = 'none';
+                    }, 3000);
                     break;
                 case 'updated':
                     syncStatus.innerHTML = '📥 تم تحديث البيانات';
                     setTimeout(() => {
                         syncStatus.style.display = 'none';
-                    }, 5000);
+                    }, 3000);
                     break;
                 case 'backup':
                     backupStatus.classList.add('show');
@@ -1487,23 +1477,14 @@
             
             try {
                 updateSyncStatus('syncing');
-                console.log("🔄 جاري حفظ البيانات إلى السيرفر...");
                 
                 const currentData = getCurrentData();
                 const currentDataString = JSON.stringify(currentData);
                 
                 // إذا لم تتغير البيانات، لا نحتاج للحفظ
                 if (currentDataString === lastSyncData) {
-                    console.log("ℹ️ لا توجد تغييرات للحفظ");
                     updateSyncStatus('success');
                     return;
-                }
-                
-                // التحقق من حجم البيانات
-                if (currentDataString.length > 1000000) { // 1MB
-                    console.warn("⚠️ البيانات كبيرة جداً، جاري تقليل الحجم");
-                    // تقليل حجم البيانات
-                    currentData.dialectsData = compressDialectsData(currentData.dialectsData);
                 }
                 
                 const res = await fetch(SERVER_URL, {
@@ -1521,22 +1502,20 @@
                 });
                 
                 if (!res.ok) {
-                    const errorText = await res.text();
-                    throw new Error(`خطأ في السيرفر: ${res.status} - ${errorText}`);
+                    throw new Error(`خطأ في السيرفر: ${res.status}`);
                 }
                 
                 const result = await res.json();
                 
                 if (result.success) {
                     lastSyncData = currentDataString;
-                    console.log("💾 تم الحفظ إلى السيرفر بنجاح");
                     updateSyncStatus('success');
                 } else {
                     throw new Error(result.error || 'خطأ غير معروف من السيرفر');
                 }
                 
             } catch (e) {
-                console.warn("⚠️ فشل الحفظ إلى السيرفر:", e.message);
+                console.warn("⚠️ فشل الحفظ إلى السيرفر");
                 updateSyncStatus('error');
                 
                 // محاولة استخدام النسخة الاحتياطية
@@ -1544,44 +1523,21 @@
             }
         }
 
-        // دالة ضغط البيانات
-        function compressDialectsData(data) {
-            const compressed = {};
-            Object.keys(data).forEach(dialect => {
-                compressed[dialect] = {
-                    name: data[dialect].name,
-                    terms: data[dialect].terms.map(term => ({
-                        i: term.id,
-                        t: term.term,
-                        m: term.meaning,
-                        d: term.dialect,
-                        c: term.category,
-                        r: term.response,
-                        u: term.understanding,
-                        ts: term.timestamp
-                    }))
-                };
-            });
-            return compressed;
-        }
-
         // حفظ احتياطي محلي
         async function tryBackupSave(data) {
             try {
                 localStorage.setItem('backupData', JSON.stringify(data));
                 localStorage.setItem('lastBackup', new Date().toISOString());
-                console.log("📦 تم الحفظ الاحتياطي المحلي");
                 
                 // محاولة إرسال البيانات مرة أخرى بعد دقيقة
                 setTimeout(() => {
                     if (isServerSyncEnabled) {
-                        console.log("🔄 إعادة محاولة الاتصال بالسيرفر...");
                         saveToServer();
                     }
                 }, 60000);
                 
             } catch (backupError) {
-                console.error("❌ فشل الحفظ الاحتياطي:", backupError);
+                console.error("❌ فشل الحفظ الاحتياطي");
             }
         }
 
@@ -1596,13 +1552,11 @@
                         saveDialectsData();
                         updateStatistics();
                         showDialect(currentDialect);
-                        console.log("📥 تم تحميل البيانات من النسخة الاحتياطية");
                         updateSyncStatus('backup');
-                        showNotification('تم تحميل البيانات من النسخة الاحتياطية المحلية', 'info');
                     }
                 }
             } catch (e) {
-                console.warn("⚠️ فشل تحميل النسخة الاحتياطية:", e);
+                console.warn("⚠️ فشل تحميل النسخة الاحتياطية");
             }
         }
 
@@ -1610,7 +1564,6 @@
         async function loadFromServer() {
             try {
                 updateSyncStatus('syncing');
-                console.log("🔄 جاري تحميل البيانات من السيرفر...");
                 
                 const res = await fetch(SERVER_URL);
                 
@@ -1627,8 +1580,6 @@
                     
                     // إذا كانت البيانات مختلفة عن البيانات المحلية
                     if (serverDataString !== lastSyncData) {
-                        console.log("🔄 اكتشاف تغييرات من السيرفر، جاري التحديث...");
-                        
                         // تحديث البيانات المحلية
                         if (serverData.dialectsData) {
                             dialectsData = serverData.dialectsData;
@@ -1650,21 +1601,17 @@
                         updateStatistics();
                         showDialect(currentDialect);
                         
-                        console.log("✅ تم تحميل وتحديث البيانات من السيرفر");
                         updateSyncStatus('updated');
-                        showNotification('تم تحديث البيانات من السحابة بنجاح', 'success');
                         
                         lastSyncData = serverDataString;
                     } else {
-                        console.log("ℹ️ البيانات على السيرفر مطابقة للمحلية");
                         updateSyncStatus('success');
                     }
                 } else {
-                    console.log("ℹ️ لا توجد بيانات على السيرفر، استخدام البيانات المحلية");
                     updateSyncStatus('success');
                 }
             } catch (e) {
-                console.warn("⚠️ فشل التحميل من السيرفر:", e.message);
+                console.warn("⚠️ فشل التحميل من السيرفر");
                 updateSyncStatus('error');
                 
                 // استخدام النسخة الاحتياطية إذا فشل التحميل
@@ -1681,20 +1628,20 @@
                 loadFromServer();
             }, 2000);
             
-            // المزامنة التلقائية كل 10 ثواني
+            // المزامنة التلقائية كل 30 ثانية (بدلاً من 10)
             serverSyncTimer = setInterval(() => {
                 syncDataBetweenDevices();
-            }, 10000);
+            }, 30000);
             
-            // الحفظ التلقائي كل 30 ثانية
-            setInterval(saveToServer, 30000);
+            // الحفظ التلقائي كل دقيقة (بدلاً من 30 ثانية)
+            setInterval(saveToServer, 60000);
             
             // أيضًا حفظ عند إضافة أو تعديل مصطلح
             document.addEventListener('termChanged', function() {
                 setTimeout(() => {
                     saveToServer();
                     syncDataBetweenDevices();
-                }, 1000);
+                }, 2000);
             });
         }
 
@@ -2203,7 +2150,14 @@
             showNotification('تم تسجيل الخروج بنجاح', 'success');
         }
 
+        // إظهار الإشعارات مع منع التكرار
         function showNotification(message, type) {
+            const now = Date.now();
+            if (now - lastNotificationTime < NOTIFICATION_COOLDOWN) {
+                return;
+            }
+            lastNotificationTime = now;
+            
             const oldNotification = document.querySelector('.notification');
             if (oldNotification) {
                 oldNotification.remove();
