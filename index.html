@@ -71,7 +71,7 @@
             font-weight: 600;
         }
 
-        .form-group input {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -80,7 +80,7 @@
             transition: border-color 0.3s ease;
         }
 
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
             border-color: var(--secondary-color);
         }
@@ -109,6 +109,22 @@
 
         .btn-secondary:hover {
             background: #7f8c8d;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background: #219653;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
         }
 
         .login-info {
@@ -274,6 +290,68 @@
             margin: 10px 0;
         }
 
+        .add-term-section {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .auto-save-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--success-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .auto-save-indicator.show {
+            display: block;
+            animation: fadeInOut 2s ease;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .restore-draft-btn {
+            background: var(--warning-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .restore-draft-btn:hover {
+            background: #e67e22;
+        }
+
         .dialects-section {
             background: var(--white);
             padding: 30px;
@@ -385,6 +463,38 @@
         .understood { background: #d4edda; color: #155724; }
         .partial { background: #fff3cd; color: #856404; }
         .not-understood { background: #f8d7da; color: #721c24; }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .edit-btn {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #2980b9;
+        }
+
+        .delete-btn {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
 
         .charts-section {
             background: var(--white);
@@ -629,6 +739,10 @@
             .message {
                 max-width: 90%;
             }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -707,7 +821,7 @@
                 </section>
 
                 <!-- الإحصائيات السريعة -->
-                <div class="stats-grid">
+                <div class="stats-grid" id="statsGrid">
                     <div class="stat-card">
                         <h3>نسبة الفهم الكلي</h3>
                         <div class="stat-number">-</div>
@@ -725,6 +839,57 @@
                     </div>
                 </div>
 
+                <!-- قسم إضافة المصطلحات الجديدة -->
+                <section class="add-term-section">
+                    <div class="auto-save-indicator" id="autoSaveIndicator">تم الحفظ التلقائي</div>
+                    <h2 class="section-title">إضافة مصطلح جديد</h2>
+                    <form id="addTermForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="term">المصطلح</label>
+                                <input type="text" id="term" name="term" required placeholder="أدخل المصطلح باللهجة">
+                            </div>
+                            <div class="form-group">
+                                <label for="meaning">المعنى</label>
+                                <input type="text" id="meaning" name="meaning" required placeholder="أدخل المعنى بالعربية الفصحى">
+                            </div>
+                            <div class="form-group">
+                                <label for="dialect">اللهجة</label>
+                                <select id="dialect" name="dialect" required>
+                                    <option value="">اختر اللهجة</option>
+                                    <option value="najdi">اللهجة النجدية</option>
+                                    <option value="northern">اللهجة الشمالية</option>
+                                    <option value="southern">اللهجة الجنوبية</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="category">التصنيف</label>
+                                <input type="text" id="category" name="category" required placeholder="مثال: طعام، ملابس، تعبيرات">
+                            </div>
+                            <div class="form-group">
+                                <label for="aiResponse">استجابة HUMAIN</label>
+                                <textarea id="aiResponse" name="aiResponse" required placeholder="كيف استجاب الذكاء الاصطناعي" rows="2"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="understanding">مستوى الفهم</label>
+                                <select id="understanding" name="understanding" required>
+                                    <option value="">اختر مستوى الفهم</option>
+                                    <option value="understood">مفهوم</option>
+                                    <option value="partial">فهم جزئي</option>
+                                    <option value="not-understood">غير مفهوم</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-warning" onclick="clearForm()">مسح النموذج</button>
+                            <button type="button" class="restore-draft-btn" id="restoreDraftBtn" style="display:none;" onclick="restoreDraft()">استعادة المسودة</button>
+                            <button type="submit" class="btn btn-success" id="submitBtn">إضافة المصطلح</button>
+                        </div>
+                    </form>
+                </section>
+
                 <!-- قسم اللهجات -->
                 <section class="dialects-section">
                     <h2 class="section-title">اللهجات المدعومة</h2>
@@ -732,34 +897,34 @@
                         <div class="dialect-card active" onclick="showDialect('najdi')" id="najdiCard">
                             <h3>اللهجة النجدية</h3>
                             <p>لهجة منطقة نجد تشمل الرياض والقصيم وحائل</p>
-                            <div class="dialect-stats">
+                            <div class="dialect-stats" id="najdiStats">
                                 <span>0 مصطلح</span>
                                 <span>0% فهم</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill progress-najdi"></div>
+                                <div class="progress-fill progress-najdi" id="najdiProgress"></div>
                             </div>
                         </div>
                         <div class="dialect-card" onclick="showDialect('northern')" id="northernCard">
                             <h3>اللهجة الشمالية</h3>
                             <p>لهجة مناطق شمال السعودية</p>
-                            <div class="dialect-stats">
+                            <div class="dialect-stats" id="northernStats">
                                 <span>0 مصطلح</span>
                                 <span>0% فهم</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill progress-northern"></div>
+                                <div class="progress-fill progress-northern" id="northernProgress"></div>
                             </div>
                         </div>
                         <div class="dialect-card" onclick="showDialect('southern')" id="southernCard">
                             <h3>اللهجة الجنوبية</h3>
                             <p>لهجة مناطق جنوب السعودية</p>
-                            <div class="dialect-stats">
+                            <div class="dialect-stats" id="southernStats">
                                 <span>0 مصطلح</span>
                                 <span>0% فهم</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill progress-southern"></div>
+                                <div class="progress-fill progress-southern" id="southernProgress"></div>
                             </div>
                         </div>
                     </div>
@@ -776,12 +941,13 @@
                                     <th>المعنى</th>
                                     <th>التصنيف</th>
                                     <th>استجابة HUMAIN</th>
-                                    <th>النتيجة </th>
+                                    <th>النتيجة</th>
+                                    <th>الإجراءات</th>
                                 </tr>
                             </thead>
                             <tbody id="termsTable">
                                 <tr>
-                                    <td colspan="5" class="empty-table-message">
+                                    <td colspan="6" class="empty-table-message">
                                         لا توجد بيانات مضافة بعد. سيتم عرض المصطلحات هنا بعد إضافتها.
                                     </td>
                                 </tr>
@@ -796,7 +962,7 @@
                     <div class="charts-grid">
                         <div class="chart-card">
                             <h3>توزيع مستوى الفهم</h3>
-                            <div class="chart-placeholder">
+                            <div class="chart-placeholder" id="understandingChart">
                                 📊 مخطط دائري - توزيع مستوى الفهم<br>
                                 <br>
                                 سيتم عرض البيانات بعد إدخالها
@@ -804,7 +970,7 @@
                         </div>
                         <div class="chart-card">
                             <h3>مقارنة بين اللهجات</h3>
-                            <div class="chart-placeholder">
+                            <div class="chart-placeholder" id="dialectsComparisonChart">
                                 📈 مخطط أعمدة - مقارنة نسبة الفهم<br>
                                 <br>
                                 سيتم عرض البيانات بعد إدخالها
@@ -845,8 +1011,8 @@
         // بيانات المستخدمين (سيتم تخزينها محلياً)
         let users = JSON.parse(localStorage.getItem('users')) || {};
         
-        // بيانات اللهجات فارغة
-        const dialectsData = {
+        // بيانات اللهجات - سيتم تحميلها من localStorage أو استخدام البيانات الافتراضية
+        let dialectsData = JSON.parse(localStorage.getItem('dialectsData')) || {
             najdi: {
                 name: "اللهجة النجدية",
                 terms: []
@@ -861,6 +1027,12 @@
             }
         };
 
+        // المتغيرات للتحكم في التعديل
+        let editingTermId = null;
+        let currentDialect = 'najdi';
+        let autoSaveTimer = null;
+        let hasUnsavedChanges = false;
+
         // التحقق من حالة الدخول عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
             if (localStorage.getItem('loggedIn') === 'true') {
@@ -868,9 +1040,453 @@
             } else {
                 showLogin();
             }
+            
+            // تحميل البيانات المحفوظة
+            loadDialectsData();
+            
+            // إضافة معالج الحدث للنموذج
+            document.getElementById('addTermForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (editingTermId) {
+                    updateTerm();
+                } else {
+                    addNewTerm();
+                }
+            });
+
+            // إضافة مستمعين للحفظ التلقائي
+            setupAutoSave();
+            
+            // محاولة استعادة المسودة المحفوظة
+            restoreDraftOnLoad();
         });
 
-        // تبديل بين تسجيل الدخول وإنشاء حساب
+        // إعداد الحفظ التلقائي
+        function setupAutoSave() {
+            const formInputs = document.querySelectorAll('#addTermForm input, #addTermForm select, #addTermForm textarea');
+            
+            formInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    hasUnsavedChanges = true;
+                    scheduleAutoSave();
+                });
+            });
+        }
+
+        // جدولة الحفظ التلقائي
+        function scheduleAutoSave() {
+            // إلغاء المؤقت السابق إذا كان موجوداً
+            if (autoSaveTimer) {
+                clearTimeout(autoSaveTimer);
+            }
+            
+            // جدولة الحفظ بعد 2 ثانية من آخر تعديل
+            autoSaveTimer = setTimeout(() => {
+                saveDraft();
+            }, 2000);
+        }
+
+        // حفظ المسودة
+        function saveDraft() {
+            if (!hasUnsavedChanges) return;
+            
+            const formData = {
+                term: document.getElementById('term').value,
+                meaning: document.getElementById('meaning').value,
+                dialect: document.getElementById('dialect').value,
+                category: document.getElementById('category').value,
+                aiResponse: document.getElementById('aiResponse').value,
+                understanding: document.getElementById('understanding').value
+            };
+            
+            // التحقق إذا كان هناك بيانات للحفظ
+            const hasData = Object.values(formData).some(value => value.trim() !== '');
+            
+            if (hasData) {
+                localStorage.setItem('termDraft', JSON.stringify(formData));
+                showAutoSaveIndicator();
+                hasUnsavedChanges = false;
+            }
+        }
+
+        // استعادة المسودة عند التحميل
+        function restoreDraftOnLoad() {
+            const savedDraft = localStorage.getItem('termDraft');
+            if (savedDraft) {
+                document.getElementById('restoreDraftBtn').style.display = 'inline-block';
+            }
+        }
+
+        // استعادة المسودة
+        function restoreDraft() {
+            const savedDraft = localStorage.getItem('termDraft');
+            if (savedDraft) {
+                const formData = JSON.parse(savedDraft);
+                
+                document.getElementById('term').value = formData.term || '';
+                document.getElementById('meaning').value = formData.meaning || '';
+                document.getElementById('dialect').value = formData.dialect || '';
+                document.getElementById('category').value = formData.category || '';
+                document.getElementById('aiResponse').value = formData.aiResponse || '';
+                document.getElementById('understanding').value = formData.understanding || '';
+                
+                showNotification('تم استعادة المسودة المحفوظة', 'success');
+                document.getElementById('restoreDraftBtn').style.display = 'none';
+            }
+        }
+
+        // إظهار مؤشر الحفظ التلقائي
+        function showAutoSaveIndicator() {
+            const indicator = document.getElementById('autoSaveIndicator');
+            indicator.classList.add('show');
+            
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+
+        // وظيفة إضافة مصطلح جديد
+        function addNewTerm() {
+            const form = document.getElementById('addTermForm');
+            const formData = new FormData(form);
+            
+            const newTerm = {
+                id: Date.now().toString(),
+                term: formData.get('term'),
+                meaning: formData.get('meaning'),
+                dialect: formData.get('dialect'),
+                category: formData.get('category'),
+                response: formData.get('aiResponse'),
+                understanding: formData.get('understanding')
+            };
+            
+            // إضافة المصطلح إلى البيانات
+            dialectsData[newTerm.dialect].terms.push(newTerm);
+            
+            // حفظ البيانات
+            saveDialectsData();
+            
+            // تحديث الواجهة
+            updateStatistics();
+            showDialect(currentDialect);
+            
+            // إعادة تعيين النموذج
+            clearForm();
+            
+            // إظهار إشعار النجاح
+            showNotification('تم إضافة المصطلح بنجاح', 'success');
+        }
+
+        // وظيفة تحديث مصطلح موجود
+        function updateTerm() {
+            const form = document.getElementById('addTermForm');
+            const formData = new FormData(form);
+            
+            // البحث عن المصطلح وتحديثه
+            const dialect = formData.get('dialect');
+            const termIndex = dialectsData[dialect].terms.findIndex(term => term.id === editingTermId);
+            
+            if (termIndex !== -1) {
+                dialectsData[dialect].terms[termIndex] = {
+                    id: editingTermId,
+                    term: formData.get('term'),
+                    meaning: formData.get('meaning'),
+                    dialect: dialect,
+                    category: formData.get('category'),
+                    response: formData.get('aiResponse'),
+                    understanding: formData.get('understanding')
+                };
+                
+                // حفظ البيانات
+                saveDialectsData();
+                
+                // تحديث الواجهة
+                updateStatistics();
+                showDialect(currentDialect);
+                
+                // إعادة تعيين النموذج
+                clearForm();
+                
+                // إظهار إشعار النجاح
+                showNotification('تم تحديث المصطلح بنجاح', 'success');
+            }
+        }
+
+        // وظيفة حذف مصطلح
+        function deleteTerm(termId, dialect) {
+            if (confirm('هل أنت متأكد من حذف هذا المصطلح؟')) {
+                // البحث عن المصطلح وحذفه
+                dialectsData[dialect].terms = dialectsData[dialect].terms.filter(term => term.id !== termId);
+                
+                // حفظ البيانات
+                saveDialectsData();
+                
+                // تحديث الواجهة
+                updateStatistics();
+                showDialect(currentDialect);
+                
+                // إظهار إشعار النجاح
+                showNotification('تم حذف المصطلح بنجاح', 'success');
+            }
+        }
+
+        // وظيفة تعديل مصطلح
+        function editTerm(termId, dialect) {
+            // البحث عن المصطلح
+            const term = dialectsData[dialect].terms.find(term => term.id === termId);
+            
+            if (term) {
+                // تعبئة النموذج بقيم المصطلح
+                document.getElementById('term').value = term.term;
+                document.getElementById('meaning').value = term.meaning;
+                document.getElementById('dialect').value = term.dialect;
+                document.getElementById('category').value = term.category;
+                document.getElementById('aiResponse').value = term.response;
+                document.getElementById('understanding').value = term.understanding;
+                
+                // تعيين حالة التعديل
+                editingTermId = termId;
+                
+                // تغيير نص زر الإرسال
+                document.getElementById('submitBtn').textContent = 'تحديث المصطلح';
+                
+                // التمرير إلى قسم الإضافة
+                document.querySelector('.add-term-section').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // وظيفة مسح النموذج
+        function clearForm() {
+            document.getElementById('addTermForm').reset();
+            editingTermId = null;
+            document.getElementById('submitBtn').textContent = 'إضافة المصطلح';
+            
+            // مسح المسودة المحفوظة
+            localStorage.removeItem('termDraft');
+            document.getElementById('restoreDraftBtn').style.display = 'none';
+            hasUnsavedChanges = false;
+        }
+
+        // وظيفة حفظ بيانات اللهجات
+        function saveDialectsData() {
+            localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
+        }
+
+        // وظيفة تحميل بيانات اللهجات
+        function loadDialectsData() {
+            const savedData = localStorage.getItem('dialectsData');
+            if (savedData) {
+                dialectsData = JSON.parse(savedData);
+                updateStatistics();
+            }
+        }
+
+        // وظيفة تحديث الإحصائيات
+        function updateStatistics() {
+            // حساب الإحصائيات العامة
+            let totalTerms = 0;
+            let totalUnderstood = 0;
+            let totalPartial = 0;
+            let totalNotUnderstood = 0;
+            
+            // حساب إحصائيات كل لهجة
+            Object.keys(dialectsData).forEach(dialectKey => {
+                const dialect = dialectsData[dialectKey];
+                const termsCount = dialect.terms.length;
+                
+                // حساب نسبة الفهم
+                const understoodCount = dialect.terms.filter(term => term.understanding === 'understood').length;
+                const partialCount = dialect.terms.filter(term => term.understanding === 'partial').length;
+                const notUnderstoodCount = dialect.terms.filter(term => term.understanding === 'not-understood').length;
+                
+                // حساب نسبة الفهم الإجمالية (مفهوم + نصف فهم جزئي)
+                const understandingPercentage = termsCount > 0 ? 
+                    Math.round(((understoodCount + (partialCount * 0.5)) / termsCount) * 100) : 0;
+                
+                // تحديث بطاقة اللهجة
+                const statsElement = document.getElementById(`${dialectKey}Stats`);
+                const progressElement = document.getElementById(`${dialectKey}Progress`);
+                
+                if (statsElement) {
+                    statsElement.innerHTML = `
+                        <span>${termsCount} مصطلح</span>
+                        <span>${understandingPercentage}% فهم</span>
+                    `;
+                }
+                
+                if (progressElement) {
+                    progressElement.style.width = `${understandingPercentage}%`;
+                }
+                
+                // تحديث الإحصائيات العامة
+                totalTerms += termsCount;
+                totalUnderstood += understoodCount;
+                totalPartial += partialCount;
+                totalNotUnderstood += notUnderstoodCount;
+            });
+            
+            // حساب النسب العامة
+            const totalUnderstandingPercentage = totalTerms > 0 ? 
+                Math.round(((totalUnderstood + (totalPartial * 0.5)) / totalTerms) * 100) : 0;
+            
+            const errorRate = totalTerms > 0 ? 
+                Math.round((totalNotUnderstood / totalTerms) * 100) : 0;
+            
+            // تحديث شبكة الإحصائيات
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <h3>نسبة الفهم الكلي</h3>
+                    <div class="stat-number">${totalUnderstandingPercentage}%</div>
+                    <p>من إجمالي ${totalTerms} مصطلح</p>
+                </div>
+                <div class="stat-card">
+                    <h3>المصطلحات المفهومة</h3>
+                    <div class="stat-number">${totalUnderstood}</div>
+                    <p>${totalPartial} مفهومة جزئياً</p>
+                </div>
+                <div class="stat-card">
+                    <h3>نسبة الخطأ</h3>
+                    <div class="stat-number">${errorRate}%</div>
+                    <p>${totalNotUnderstood} مصطلح غير مفهوم</p>
+                </div>
+            `;
+            
+            // تحديث المخططات
+            updateCharts();
+        }
+
+        // وظيفة تحديث المخططات
+        function updateCharts() {
+            // مخطط توزيع مستوى الفهم
+            let understoodCount = 0;
+            let partialCount = 0;
+            let notUnderstoodCount = 0;
+            
+            Object.keys(dialectsData).forEach(dialectKey => {
+                const dialect = dialectsData[dialectKey];
+                understoodCount += dialect.terms.filter(term => term.understanding === 'understood').length;
+                partialCount += dialect.terms.filter(term => term.understanding === 'partial').length;
+                notUnderstoodCount += dialect.terms.filter(term => term.understanding === 'not-understood').length;
+            });
+            
+            const totalTerms = understoodCount + partialCount + notUnderstoodCount;
+            
+            if (totalTerms > 0) {
+                const understandingChart = document.getElementById('understandingChart');
+                understandingChart.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 10px; height: 100%; justify-content: center;">
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 15px; height: 15px; background: #27ae60; margin-left: 10px;"></div>
+                            <span>مفهوم: ${understoodCount} (${Math.round((understoodCount/totalTerms)*100)}%)</span>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 15px; height: 15px; background: #f39c12; margin-left: 10px;"></div>
+                            <span>فهم جزئي: ${partialCount} (${Math.round((partialCount/totalTerms)*100)}%)</span>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 15px; height: 15px; background: #e74c3c; margin-left: 10px;"></div>
+                            <span>غير مفهوم: ${notUnderstoodCount} (${Math.round((notUnderstoodCount/totalTerms)*100)}%)</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // مخطط مقارنة اللهجات
+            const dialectsComparisonChart = document.getElementById('dialectsComparisonChart');
+            let comparisonHTML = '<div style="display: flex; flex-direction: column; gap: 15px; height: 100%; justify-content: center;">';
+            
+            Object.keys(dialectsData).forEach(dialectKey => {
+                const dialect = dialectsData[dialectKey];
+                const termsCount = dialect.terms.length;
+                
+                if (termsCount > 0) {
+                    const understoodCount = dialect.terms.filter(term => term.understanding === 'understood').length;
+                    const partialCount = dialect.terms.filter(term => term.understanding === 'partial').length;
+                    const understandingPercentage = Math.round(((understoodCount + (partialCount * 0.5)) / termsCount) * 100);
+                    
+                    comparisonHTML += `
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span>${dialect.name}</span>
+                                <span>${understandingPercentage}%</span>
+                            </div>
+                            <div style="width: 100%; height: 20px; background: #ecf0f1; border-radius: 10px; overflow: hidden;">
+                                <div style="width: ${understandingPercentage}%; height: 100%; background: #3498db; border-radius: 10px;"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            comparisonHTML += '</div>';
+            dialectsComparisonChart.innerHTML = comparisonHTML;
+        }
+
+        // وظيفة showDialect المعدلة
+        function showDialect(dialectKey) {
+            currentDialect = dialectKey;
+            
+            // تحديث البطاقات النشطة
+            document.querySelectorAll('.dialect-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById(dialectKey + 'Card').classList.add('active');
+
+            const dialect = dialectsData[dialectKey];
+            const tableBody = document.getElementById('termsTable');
+            const tableTitle = document.getElementById('tableTitle');
+            
+            // تحديث عنوان الجدول
+            tableTitle.textContent = `المصطلحات ونتائج الفهم - ${dialect.name}`;
+            
+            // تفريغ الجدول
+            tableBody.innerHTML = '';
+            
+            // التحقق إذا كانت هناك بيانات
+            if (dialect.terms.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
+                    <td colspan="6" class="empty-table-message">
+                        لا توجد بيانات مضافة بعد. سيتم عرض المصطلحات هنا بعد إضافتها.
+                    </td>
+                `;
+                tableBody.appendChild(emptyRow);
+            } else {
+                // ملء الجدول بالبيانات
+                dialect.terms.forEach(term => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${term.term}</strong></td>
+                        <td>${term.meaning}</td>
+                        <td>${term.category}</td>
+                        <td>${term.response}</td>
+                        <td><span class="understanding-badge ${term.understanding}">
+                            ${getUnderstandingText(term.understanding)}
+                        </span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn" onclick="editTerm('${term.id}', '${dialectKey}')">تعديل</button>
+                                <button class="action-btn delete-btn" onclick="deleteTerm('${term.id}', '${dialectKey}')">حذف</button>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+
+        // باقي الوظائف تبقى كما هي
+        function getUnderstandingText(level) {
+            const levels = {
+                'understood': 'مفهوم',
+                'partial': 'فهم جزئي', 
+                'not-understood': 'غير مفهوم'
+            };
+            return levels[level] || level;
+        }
+
+        // وظائف تسجيل الدخول والمحادثة تبقى كما هي
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -961,59 +1577,6 @@
             document.getElementById('loginForm').reset();
         }
 
-        function showDialect(dialectKey) {
-            // تحديث البطاقات النشطة
-            document.querySelectorAll('.dialect-card').forEach(card => {
-                card.classList.remove('active');
-            });
-            document.getElementById(dialectKey + 'Card').classList.add('active');
-
-            const dialect = dialectsData[dialectKey];
-            const tableBody = document.getElementById('termsTable');
-            const tableTitle = document.getElementById('tableTitle');
-            
-            // تحديث عنوان الجدول
-            tableTitle.textContent = `المصطلحات ونتائج الفهم - ${dialect.name}`;
-            
-            // تفريغ الجدول
-            tableBody.innerHTML = '';
-            
-            // التحقق إذا كانت هناك بيانات
-            if (dialect.terms.length === 0) {
-                const emptyRow = document.createElement('tr');
-                emptyRow.innerHTML = `
-                    <td colspan="5" class="empty-table-message">
-                        لا توجد بيانات مضافة بعد. سيتم عرض المصطلحات هنا بعد إضافتها.
-                    </td>
-                `;
-                tableBody.appendChild(emptyRow);
-            } else {
-                // ملء الجدول بالبيانات (في حال كانت موجودة)
-                dialect.terms.forEach(term => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><strong>${term.term}</strong></td>
-                        <td>${term.meaning}</td>
-                        <td>${term.category}</td>
-                        <td>${term.response}</td>
-                        <td><span class="understanding-badge ${term.understanding}">
-                            ${getUnderstandingText(term.understanding)}
-                        </span></td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            }
-        }
-
-        function getUnderstandingText(level) {
-            const levels = {
-                'understood': 'مفهوم',
-                'partial': 'فهم جزئي', 
-                'not-understood': 'غير مفهوم'
-            };
-            return levels[level] || level;
-        }
-
         function logout() {
             localStorage.removeItem('loggedIn');
             localStorage.removeItem('username');
@@ -1102,32 +1665,26 @@
 
         // الدالة المعدلة للاتصال المباشر بالAPI
         async function sendToAI(prompt) {
-    try {
-        const response = await fetch("https://twilight-haze-d33b.abdullahalshehrih5-22a.workers.dev/chat", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ message: prompt }),
-        });
+            try {
+                const response = await fetch("https://twilight-haze-d33b.abdullahalshehrih5-22a.workers.dev", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ message: prompt })
+                });
 
-        const data = await response.json();
-        return data.reply;
-    } catch (error) {
-        console.error("Error communicating with server:", error);
-        throw error;
-    }
-}
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
-
+                const data = await response.json();
+                return data.reply;
+            } catch (err) {
+                console.error("Error communicating with server:", err);
+                return "عذراً، حدث خطأ في الاتصال بالخادم. يرجى التأكد أن السيرفر يعمل.";
+            }
+        }
     </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
