@@ -176,6 +176,7 @@
 
         .success { background: var(--success-color); }
         .error { background: var(--accent-color); }
+        .warning { background: var(--warning-color); }
 
         @keyframes slideIn {
             from { transform: translateX(-100%); }
@@ -467,8 +468,7 @@
         .table-container {
             overflow-x: auto;
             margin-top: 20px;
-        }
-
+}
         table {
             width: 100%;
             border-collapse: collapse;
@@ -750,6 +750,20 @@
             display: block;
         }
 
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .charts-grid {
                 grid-template-columns: 1fr;
@@ -992,7 +1006,7 @@
                             <tbody id="termsTable">
                                 <tr>
                                     <td colspan="6" class="empty-table-message">
-                                        لا توجد بيانات مضافة بعد. سيتم عرض المصطلحات هنا بعد إضافتها.
+                                        <div class="loading"></div> جاري تحميل البيانات...
                                     </td>
                                 </tr>
                             </tbody>
@@ -1052,23 +1066,14 @@
     </div>
 
     <script>
-        // بيانات المستخدمين (سيتم تخزينها محلياً)
-        let users = JSON.parse(localStorage.getItem('users')) || {};
+        // بيانات المستخدمين (سيتم تخزينها في السيرفر)
+        let users = {};
         
-        // بيانات اللهجات - سيتم تحميلها من KV أو استخدام البيانات الافتراضية
+        // بيانات اللهجات - سيتم تحميلها من السيرفر
         let dialectsData = {
-            najdi: {
-                name: "اللهجة النجدية",
-                terms: []
-            },
-            northern: {
-                name: "اللهجة الشمالية", 
-                terms: []
-            },
-            southern: {
-                name: "اللهجة الجنوبية",
-                terms: []
-            }
+            najdi: { name: "اللهجة النجدية", terms: [] },
+            northern: { name: "اللهجة الشمالية", terms: [] },
+            southern: { name: "اللهجة الجنوبية", terms: [] }
         };
 
         // المتغيرات للتحكم في التعديل
@@ -1077,18 +1082,15 @@
         let autoSaveTimer = null;
         let hasUnsavedChanges = false;
 
+        // عنوان السيرفر الخاص بك - غير هذا الرابط
+        const SERVER_URL = 'https://your-server.com/api';
+
         // التحقق من حالة الدخول عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
             // تحميل إعدادات الوضع
             loadTheme();
             
-            if (localStorage.getItem('loggedIn') === 'true') {
-                showDashboard();
-            } else {
-                showLogin();
-            }
-            
-            // تحميل البيانات من KV
+            // تحميل البيانات من السيرفر
             loadDialectsData();
             
             // إضافة معالج الحدث للنموذج
@@ -1103,9 +1105,6 @@
 
             // إضافة مستمعين للحفظ التلقائي
             setupAutoSave();
-            
-            // محاولة استعادة المسودة المحفوظة
-            restoreDraftOnLoad();
         });
 
         // وظيفة تبديل الوضع
@@ -1137,12 +1136,10 @@
 
         // جدولة الحفظ التلقائي
         function scheduleAutoSave() {
-            // إلغاء المؤقت السابق إذا كان موجوداً
             if (autoSaveTimer) {
                 clearTimeout(autoSaveTimer);
             }
             
-            // جدولة الحفظ بعد 2 ثانية من آخر تعديل
             autoSaveTimer = setTimeout(() => {
                 saveDraft();
             }, 2000);
@@ -1161,39 +1158,50 @@
                 understanding: document.getElementById('understanding').value
             };
             
-            // التحقق إذا كان هناك بيانات للحفظ
             const hasData = Object.values(formData).some(value => value.trim() !== '');
             
             if (hasData) {
-                localStorage.setItem('termDraft', JSON.stringify(formData));
+                // حفظ المسودة في السيرفر
+                saveDraftToServer(formData);
                 showAutoSaveIndicator();
                 hasUnsavedChanges = false;
             }
         }
 
-        // استعادة المسودة عند التحميل
-        function restoreDraftOnLoad() {
-            const savedDraft = localStorage.getItem('termDraft');
-            if (savedDraft) {
-                document.getElementById('restoreDraftBtn').style.display = 'inline-block';
+        // حفظ المسودة في السيرفر
+        async function saveDraftToServer(draftData) {
+            try {
+                await fetch(`${SERVER_URL}/draft`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(draftData)
+                });
+            } catch (error) {
+                console.error('Error saving draft:', error);
             }
         }
 
         // استعادة المسودة
-        function restoreDraft() {
-            const savedDraft = localStorage.getItem('termDraft');
-            if (savedDraft) {
-                const formData = JSON.parse(savedDraft);
-                
-                document.getElementById('term').value = formData.term || '';
-                document.getElementById('meaning').value = formData.meaning || '';
-                document.getElementById('dialect').value = formData.dialect || '';
-                document.getElementById('category').value = formData.category || '';
-                document.getElementById('aiResponse').value = formData.aiResponse || '';
-                document.getElementById('understanding').value = formData.understanding || '';
-                
-                showNotification('تم استعادة المسودة المحفوظة', 'success');
-                document.getElementById('restoreDraftBtn').style.display = 'none';
+        async function restoreDraft() {
+            try {
+                const response = await fetch(`${SERVER_URL}/draft`);
+                if (response.ok) {
+                    const formData = await response.json();
+                    
+                    document.getElementById('term').value = formData.term || '';
+                    document.getElementById('meaning').value = formData.meaning || '';
+                    document.getElementById('dialect').value = formData.dialect || '';
+                    document.getElementById('category').value = formData.category || '';
+                    document.getElementById('aiResponse').value = formData.aiResponse || '';
+                    document.getElementById('understanding').value = formData.understanding || '';
+                    
+                    showNotification('تم استعادة المسودة المحفوظة', 'success');
+                    document.getElementById('restoreDraftBtn').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error restoring draft:', error);
             }
         }
 
@@ -1219,24 +1227,27 @@
                 dialect: formData.get('dialect'),
                 category: formData.get('category'),
                 response: formData.get('aiResponse'),
-                understanding: formData.get('understanding')
+                understanding: formData.get('understanding'),
+                createdAt: new Date().toISOString()
             };
             
             // إضافة المصطلح إلى البيانات
             dialectsData[newTerm.dialect].terms.push(newTerm);
             
-            // حفظ البيانات في KV
-            await saveDialectsData();
+            // حفظ البيانات في السيرفر
+            const success = await saveDialectsData();
             
-            // تحديث الواجهة
-            updateStatistics();
-            showDialect(currentDialect);
-            
-            // إعادة تعيين النموذج
-            clearForm();
-            
-            // إظهار إشعار النجاح
-            showNotification('تم إضافة المصطلح بنجاح', 'success');
+            if (success) {
+                // تحديث الواجهة
+                updateStatistics();
+                showDialect(currentDialect);
+                
+                // إعادة تعيين النموذج
+                clearForm();
+                
+                // إظهار إشعار النجاح
+                showNotification('تم إضافة المصطلح بنجاح', 'success');
+            }
         }
 
         // وظيفة تحديث مصطلح موجود
@@ -1256,21 +1267,25 @@
                     dialect: dialect,
                     category: formData.get('category'),
                     response: formData.get('aiResponse'),
-                    understanding: formData.get('understanding')
+                    understanding: formData.get('understanding'),
+                    createdAt: dialectsData[dialect].terms[termIndex].createdAt,
+                    updatedAt: new Date().toISOString()
                 };
                 
-                // حفظ البيانات في KV
-                await saveDialectsData();
+                // حفظ البيانات في السيرفر
+                const success = await saveDialectsData();
                 
-                // تحديث الواجهة
-                updateStatistics();
-                showDialect(currentDialect);
-                
-                // إعادة تعيين النموذج
-                clearForm();
-                
-                // إظهار إشعار النجاح
-                showNotification('تم تحديث المصطلح بنجاح', 'success');
+                if (success) {
+                    // تحديث الواجهة
+                    updateStatistics();
+                    showDialect(currentDialect);
+                    
+                    // إعادة تعيين النموذج
+                    clearForm();
+                    
+                    // إظهار إشعار النجاح
+                    showNotification('تم تحديث المصطلح بنجاح', 'success');
+                }
             }
         }
 
@@ -1280,15 +1295,17 @@
                 // البحث عن المصطلح وحذفه
                 dialectsData[dialect].terms = dialectsData[dialect].terms.filter(term => term.id !== termId);
                 
-                // حفظ البيانات في KV
-                await saveDialectsData();
+                // حفظ البيانات في السيرفر
+                const success = await saveDialectsData();
                 
-                // تحديث الواجهة
-                updateStatistics();
-                showDialect(currentDialect);
-                
-                // إظهار إشعار النجاح
-                showNotification('تم حذف المصطلح بنجاح', 'success');
+                if (success) {
+                    // تحديث الواجهة
+                    updateStatistics();
+                    showDialect(currentDialect);
+                    
+                    // إظهار إشعار النجاح
+                    showNotification('تم حذف المصطلح بنجاح', 'success');
+                }
             }
         }
 
@@ -1322,17 +1339,13 @@
             document.getElementById('addTermForm').reset();
             editingTermId = null;
             document.getElementById('submitBtn').textContent = 'إضافة المصطلح';
-            
-            // مسح المسودة المحفوظة
-            localStorage.removeItem('termDraft');
-            document.getElementById('restoreDraftBtn').style.display = 'none';
             hasUnsavedChanges = false;
         }
 
-        // وظيفة حفظ بيانات اللهجات في KV
+        // وظيفة حفظ بيانات اللهجات في السيرفر
         async function saveDialectsData() {
             try {
-                const response = await fetch('https://twilight-haze-d33b.abdullahalshehrih5-22a.workers.dev/get', {
+                const response = await fetch(`${SERVER_URL}/dialects`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1341,52 +1354,106 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error('فشل في حفظ البيانات في السحابة');
+                    throw new Error('فشل في حفظ البيانات في السيرفر');
                 }
-                
-                // حفظ نسخة محلية احتياطية
-                localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
                 
                 return true;
             } catch (error) {
-                console.error('Error saving to KV:', error);
-                // استخدام التخزين المحلي كبديل
-                localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
-                showNotification('تم الحفظ محلياً فقط (مشكلة في الاتصال بالسحابة)', 'warning');
+                console.error('Error saving to server:', error);
+                showNotification('فشل في حفظ البيانات في السيرفر', 'error');
                 return false;
             }
         }
 
-        // وظيفة تحميل بيانات اللهجات من KV
+        // وظيفة تحميل بيانات اللهجات من السيرفر
         async function loadDialectsData() {
             try {
-                const response = await fetch('https://twilight-haze-d33b.abdullahalshehrih5-22a.workers.dev/get');
+                const response = await fetch(`${SERVER_URL}/dialects`);
                 
                 if (response.ok) {
                     const data = await response.json();
                     if (data && Object.keys(data).length > 0) {
                         dialectsData = data;
                     } else {
-                        // استخدام البيانات المحلية إذا كانت KV فارغة
-                        const localData = localStorage.getItem('dialectsData');
-                        if (localData) {
-                            dialectsData = JSON.parse(localData);
-                        }
+                        // إذا كانت البيانات فارغة، نضيف بيانات افتراضية
+                        await initializeDefaultData();
                     }
                 } else {
-                    throw new Error('فشل في جلب البيانات من السحابة');
+                    throw new Error('فشل في جلب البيانات من السيرفر');
                 }
             } catch (error) {
-                console.error('Error loading from KV:', error);
-                // استخدام التخزين المحلي كبديل
-                const localData = localStorage.getItem('dialectsData');
-                if (localData) {
-                    dialectsData = JSON.parse(localData);
-                }
-                showNotification('يتم استخدام البيانات المحلية (مشكلة في الاتصال بالسحابة)', 'warning');
+                console.error('Error loading from server:', error);
+                showNotification('فشل في تحميل البيانات من السيرفر', 'error');
+                // محاولة تحميل البيانات الافتراضية
+                await initializeDefaultData();
             }
             
             updateStatistics();
+            showDialect(currentDialect);
+        }
+
+        // تهيئة البيانات الافتراضية
+        async function initializeDefaultData() {
+            const defaultData = {
+                najdi: {
+                    name: "اللهجة النجدية",
+                    terms: [
+                        {
+                            id: "1",
+                            term: "ياهو",
+                            meaning: "هو",
+                            dialect: "najdi",
+                            category: "ضمائر",
+                            response: "فهم المصطلح بشكل صحيح",
+                            understanding: "understood",
+                            createdAt: new Date().toISOString()
+                        },
+                        {
+                            id: "2", 
+                            term: "شلونك",
+                            meaning: "كيف حالك",
+                            dialect: "najdi",
+                            category: "تحيات",
+                            response: "فهم المعنى الأساسي",
+                            understanding: "understood",
+                            createdAt: new Date().toISOString()
+                        }
+                    ]
+                },
+                northern: {
+                    name: "اللهجة الشمالية", 
+                    terms: [
+                        {
+                            id: "3",
+                            term: "وايش",
+                            meaning: "ماذا",
+                            dialect: "northern",
+                            category: "أسئلة",
+                            response: "لم يفهم المصطلح",
+                            understanding: "not-understood",
+                            createdAt: new Date().toISOString()
+                        }
+                    ]
+                },
+                southern: {
+                    name: "اللهجة الجنوبية",
+                    terms: [
+                        {
+                            id: "4",
+                            term: "هيوف",
+                            meaning: "هناك",
+                            dialect: "southern",
+                            category: "أماكن",
+                            response: "فهم جزئي للمعنى",
+                            understanding: "partial",
+                            createdAt: new Date().toISOString()
+                        }
+                    ]
+                }
+            };
+            
+            dialectsData = defaultData;
+            await saveDialectsData();
         }
 
         // وظيفة تحديث الإحصائيات
@@ -1653,9 +1720,6 @@
                 password: password,
                 createdAt: new Date().toISOString()
             };
-            
-            // حفظ بيانات المستخدمين
-            localStorage.setItem('users', JSON.stringify(users));
             
             showNotification('تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن', 'success');
             
