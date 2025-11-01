@@ -1295,6 +1295,9 @@
                 showLogin();
             }
             
+            // تحميل البيانات المحلية أولاً
+            loadLocalData();
+            
             // إضافة معالج الحدث للنموذج
             document.getElementById('addTermForm').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -1403,8 +1406,10 @@
                     
                     // إذا كانت البيانات مختلفة عن البيانات المحلية
                     if (serverHash !== lastServerDataHash) {
+                        console.log("🔄 اكتشاف تغييرات في البيانات، جاري الدمج...");
+                        
                         // دمج البيانات: نأخذ البيانات من السيرفر ونضيف أي بيانات محلية جديدة
-                        dialectsData = mergeData(dialectsData, serverData);
+                        dialectsData = mergeData(serverData, dialectsData);
                         localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
                         lastServerDataHash = serverHash;
                         
@@ -1420,20 +1425,18 @@
                     }
                 } else {
                     console.log("ℹ️ لا توجد بيانات على السيرفر، استخدام البيانات المحلية");
-                    loadLocalData();
                     updateSyncStatus('success');
                 }
             } catch (e) {
                 console.warn("⚠️ فشل التحميل من السيرفر:", e.message);
-                loadLocalData();
                 updateSyncStatus('error');
                 showNotification('فشل تحميل البيانات من السيرفر، استخدام البيانات المحلية', 'error');
             }
         }
 
-        // دمج البيانات بين المحلية والسيرفر
-        function mergeData(localData, serverData) {
-            const mergedData = { ...serverData };
+        // دمج البيانات بين السيرفر والمحلي
+        function mergeData(serverData, localData) {
+            const mergedData = JSON.parse(JSON.stringify(serverData));
             
             // التأكد من وجود جميع اللهجات
             ['najdi', 'northern', 'southern'].forEach(dialect => {
@@ -1472,6 +1475,7 @@
                     const localData = JSON.parse(savedData);
                     dialectsData = mergeData(dialectsData, localData);
                     updateStatistics();
+                    showDialect(currentDialect);
                 } catch (e) {
                     console.error('خطأ في تحميل البيانات المحلية:', e);
                 }
@@ -1522,18 +1526,22 @@
         // بدء المزامنة التلقائية مع السيرفر
         function startServerSync() {
             // تحميل البيانات من السيرفر عند البدء
-            loadFromServer();
+            setTimeout(() => {
+                loadFromServer();
+            }, 1000);
             
-            // المزامنة التلقائية كل 10 ثواني
+            // المزامنة التلقائية كل 15 ثانية
             serverSyncTimer = setInterval(() => {
                 loadFromServer();
-            }, 10000);
+            }, 15000);
             
             // الحفظ التلقائي كل 30 ثانية
             setInterval(saveToServer, 30000);
             
             // أيضًا حفظ عند إضافة أو تعديل مصطلح
-            document.addEventListener('termChanged', saveToServer);
+            document.addEventListener('termChanged', function() {
+                setTimeout(saveToServer, 1000);
+            });
         }
 
         // ========== وظائف إدارة المصطلحات ==========
