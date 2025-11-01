@@ -16,6 +16,23 @@
             --white: #ffffff;
             --border-radius: 8px;
             --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            
+            /* Dark Mode Variables */
+            --dark-bg: #1a1a1a;
+            --dark-surface: #2d2d2d;
+            --dark-text: #e0e0e0;
+            --dark-border: #404040;
+            --dark-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Dark Mode Styles */
+        [data-theme="dark"] {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --text-color: var(--dark-text);
+            --light-bg: var(--dark-surface);
+            --white: var(--dark-surface);
+            --box-shadow: var(--dark-shadow);
         }
 
         * {
@@ -23,6 +40,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
         body {
@@ -35,13 +53,23 @@
             direction: rtl;
         }
 
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+        }
+
         .login-container {
             background: var(--white);
             padding: 40px;
             border-radius: var(--border-radius);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: var(--box-shadow);
             width: 100%;
             max-width: 400px;
+            border: 1px solid var(--dark-border);
+        }
+
+        [data-theme="dark"] .login-container {
+            background: var(--dark-surface);
+            color: var(--dark-text);
         }
 
         .logo {
@@ -58,6 +86,10 @@
         .logo p {
             color: #666;
             font-size: 14px;
+        }
+
+        [data-theme="dark"] .logo p {
+            color: #aaa;
         }
 
         .form-group {
@@ -78,6 +110,16 @@
             border-radius: var(--border-radius);
             font-size: 16px;
             transition: border-color 0.3s ease;
+            background: var(--white);
+            color: var(--text-color);
+        }
+
+        [data-theme="dark"] .form-group input,
+        [data-theme="dark"] .form-group select,
+        [data-theme="dark"] .form-group textarea {
+            background: var(--dark-bg);
+            border-color: var(--dark-border);
+            color: var(--dark-text);
         }
 
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
@@ -137,6 +179,11 @@
             color: #666;
         }
 
+        [data-theme="dark"] .login-info {
+            background: var(--dark-bg);
+            color: #aaa;
+        }
+
         .notification {
             position: fixed;
             top: 20px;
@@ -162,6 +209,10 @@
             display: flex;
             margin-bottom: 20px;
             border-bottom: 1px solid #ddd;
+        }
+
+        [data-theme="dark"] .tabs {
+            border-bottom-color: var(--dark-border);
         }
 
         .tab {
@@ -195,6 +246,11 @@
             background-color: var(--light-bg);
         }
 
+        [data-theme="dark"] .dashboard {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
         .navbar {
             background: var(--white);
             box-shadow: var(--box-shadow);
@@ -203,6 +259,12 @@
             width: 100%;
             top: 0;
             z-index: 1000;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        [data-theme="dark"] .navbar {
+            background: var(--dark-surface);
+            color: var(--dark-text);
         }
 
         .nav-container {
@@ -223,6 +285,24 @@
             display: flex;
             align-items: center;
             gap: 15px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] .theme-toggle:hover {
+            background: rgba(255,255,255,0.1);
         }
 
         .logout-btn {
@@ -259,6 +339,10 @@
             text-align: center;
         }
 
+        [data-theme="dark"] .welcome-section {
+            background: linear-gradient(135deg, #2d2d2d, #404040);
+        }
+
         .welcome-section h1 {
             font-size: 32px;
             margin-bottom: 10px;
@@ -278,6 +362,12 @@
             box-shadow: var(--box-shadow);
             text-align: center;
             transition: transform 0.3s ease;
+            border: 1px solid var(--dark-border);
+        }
+
+        [data-theme="dark"] .stat-card {
+            background: var(--dark-surface);
+            color: var(--dark-text);
         }
 
         .stat-card:hover {
@@ -298,6 +388,12 @@
             box-shadow: var(--box-shadow);
             margin-bottom: 30px;
             position: relative;
+            border: 1px solid var(--dark-border);
+        }
+
+        [data-theme="dark"] .add-term-section {
+            background: var(--dark-surface);
+            color: var(--dark-text);
         }
 
         .form-row {
@@ -382,6 +478,12 @@
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             margin-bottom: 30px;
+            border: 1px solid var(--dark-border);
+        }
+
+        [data-theme="dark"] .dialects-section {
+            background: var(--dark-surface);
+            color: var(--dark-text);
         }
 
         .section-title {
@@ -407,6 +509,12 @@
             background: var(--white);
         }
 
+        [data-theme="dark"] .dialect-card {
+            background: var(--dark-surface);
+            border-color: var(--dark-border);
+            color: var(--dark-text);
+        }
+
         .dialect-card:hover {
             transform: translateY(-5px);
             border-color: var(--secondary-color);
@@ -416,6 +524,10 @@
         .dialect-card.active {
             border-color: var(--secondary-color);
             background: #e3f2fd;
+        }
+
+        [data-theme="dark"] .dialect-card.active {
+            background: #2d3e50;
         }
 
         .dialect-card h3 {
@@ -431,6 +543,10 @@
             border-top: 1px solid #eee;
         }
 
+        [data-theme="dark"] .dialect-stats {
+            border-top-color: var(--dark-border);
+        }
+
         .dialect-stats span {
             background: var(--light-bg);
             padding: 5px 10px;
@@ -439,12 +555,23 @@
             font-weight: 600;
         }
 
+        [data-theme="dark"] .dialect-stats span {
+            background: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
         .terms-table {
             background: var(--white);
             padding: 30px;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             margin-bottom: 30px;
+            border: 1px solid var(--dark-border);
+        }
+
+        [data-theme="dark"] .terms-table {
+            background: var(--dark-surface);
+            color: var(--dark-text);
         }
 
         .table-container {
@@ -464,6 +591,11 @@
             border-bottom: 1px solid #eee;
         }
 
+        [data-theme="dark"] th,
+        [data-theme="dark"] td {
+            border-bottom-color: var(--dark-border);
+        }
+
         th {
             background: var(--light-bg);
             color: var(--primary-color);
@@ -472,8 +604,17 @@
             top: 0;
         }
 
+        [data-theme="dark"] th {
+            background: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
         tr:hover {
             background: #f8f9fa;
+        }
+
+        [data-theme="dark"] tr:hover {
+            background: var(--dark-bg);
         }
 
         .understanding-badge {
@@ -526,6 +667,12 @@
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             margin-bottom: 30px;
+            border: 1px solid var(--dark-border);
+        }
+
+        [data-theme="dark"] .charts-section {
+            background: var(--dark-surface);
+            color: var(--dark-text);
         }
 
         .charts-grid {
@@ -540,6 +687,11 @@
             padding: 20px;
             border-radius: var(--border-radius);
             border: 1px solid #ddd;
+        }
+
+        [data-theme="dark"] .chart-card {
+            background: var(--dark-surface);
+            border-color: var(--dark-border);
         }
 
         .chart-placeholder {
@@ -557,6 +709,12 @@
             line-height: 1.6;
         }
 
+        [data-theme="dark"] .chart-placeholder {
+            background: var(--dark-bg);
+            color: #aaa;
+            border-color: var(--dark-border);
+        }
+
         .progress-bar {
             width: 100%;
             height: 20px;
@@ -564,6 +722,10 @@
             border-radius: 10px;
             overflow: hidden;
             margin: 10px 0;
+        }
+
+        [data-theme="dark"] .progress-bar {
+            background: var(--dark-bg);
         }
 
         .progress-fill {
@@ -583,6 +745,10 @@
             font-size: 16px;
         }
 
+        [data-theme="dark"] .empty-table-message {
+            color: #aaa;
+        }
+
         /* Chat Modal Styles */
         .chat-modal {
             display: none;
@@ -597,10 +763,6 @@
             justify-content: center;
         }
 
-        .chat-modal.active {
-            display: flex;
-        }
-
         .chat-container {
             background: var(--white);
             width: 90%;
@@ -612,6 +774,11 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
+        [data-theme="dark"] .chat-container {
+            background: var(--dark-surface);
+            color: var(--dark-text);
+        }
+
         .chat-header {
             padding: 20px;
             border-bottom: 1px solid #eee;
@@ -621,6 +788,10 @@
             background: var(--primary-color);
             color: var(--white);
             border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        [data-theme="dark"] .chat-header {
+            border-bottom-color: var(--dark-border);
         }
 
         .chat-header h3 {
@@ -665,11 +836,20 @@
             border-bottom-left-radius: 4px;
         }
 
+        [data-theme="dark"] .ai-message {
+            background: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
         .chat-input {
             padding: 20px;
             border-top: 1px solid #eee;
             display: flex;
             gap: 10px;
+        }
+
+        [data-theme="dark"] .chat-input {
+            border-top-color: var(--dark-border);
         }
 
         .chat-input input {
@@ -678,6 +858,14 @@
             border: 2px solid #ddd;
             border-radius: var(--border-radius);
             font-size: 16px;
+            background: var(--white);
+            color: var(--text-color);
+        }
+
+        [data-theme="dark"] .chat-input input {
+            background: var(--dark-bg);
+            border-color: var(--dark-border);
+            color: var(--dark-text);
         }
 
         .chat-input button {
@@ -724,6 +912,11 @@
             border-radius: 18px;
             border-bottom-left-radius: 4px;
             font-style: italic;
+        }
+
+        [data-theme="dark"] .typing-indicator {
+            background: var(--dark-bg);
+            color: #aaa;
         }
 
         .typing-indicator.active {
@@ -867,6 +1060,7 @@
                 </div>
                 <div class="nav-user">
                     <span id="userWelcome">مرحباً، مدير النظام</span>
+                    <button class="theme-toggle" id="themeToggle">🌙</button>
                     <button class="ai-chat-btn" onclick="openChat()">محادثة مع الذكاء الاصطناعي</button>
                     <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
                 </div>
@@ -1118,44 +1312,31 @@
         let isUsingBackup = false;
         let currentDeviceId = '';
 
-        // التحقق من حالة الدخول عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            if (localStorage.getItem('loggedIn') === 'true') {
-                showDashboard();
-            } else {
-                showLogin();
-            }
-            
-            // توليد معرف فريد للجهاز
-            currentDeviceId = getDeviceId();
-            
-            // تحميل البيانات المحلية أولاً
-            loadLocalData();
-            
-            // محاولة تحميل النسخة الاحتياطية إذا كانت البيانات المحلية فارغة
-            if (Object.keys(dialectsData.najdi.terms).length === 0) {
-                loadBackupData();
-            }
-            
-            // إضافة معالج الحدث للنموذج
-            document.getElementById('addTermForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                if (editingTermId) {
-                    updateTerm();
-                } else {
-                    addNewTerm();
-                }
-            });
+        // ========== نظام Dark Mode ==========
 
-            // إضافة مستمعين للحفظ التلقائي
-            setupAutoSave();
+        // تهيئة Dark Mode
+        function initDarkMode() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
             
-            // محاولة استعادة المسودة المحفوظة
-            restoreDraftOnLoad();
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        }
+
+        // تبديل الوضع
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        // تعيين الوضع
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
             
-            // بدء مزامنة السيرفر
-            startServerSync();
-        });
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
 
         // ========== نظام المزامنة بين الأجهزة ==========
 
@@ -1169,20 +1350,25 @@
             return deviceId;
         }
 
+        // الحصول على البيانات الحالية
+        function getCurrentData() {
+            return {
+                dialectsData: dialectsData,
+                users: users,
+                loggedIn: localStorage.getItem('loggedIn'),
+                username: localStorage.getItem('username'),
+                deviceId: currentDeviceId,
+                timestamp: new Date().toISOString()
+            };
+        }
+
         // نظام المزامنة المحسن بين الأجهزة
         async function syncDataBetweenDevices() {
             try {
                 console.log("🔄 بدء مزامنة البيانات بين الأجهزة...");
                 
-                const currentData = {
-                    dialectsData: dialectsData,
-                    users: users,
-                    loggedIn: localStorage.getItem('loggedIn'),
-                    username: localStorage.getItem('username'),
-                    deviceId: currentDeviceId,
-                    timestamp: new Date().toISOString()
-                };
-
+                const currentData = getCurrentData();
+                
                 // محاولة الحصول على أحدث بيانات من السيرفر
                 const serverData = await getServerData();
                 
@@ -1303,15 +1489,7 @@
                 updateSyncStatus('syncing');
                 console.log("🔄 جاري حفظ البيانات إلى السيرفر...");
                 
-                const currentData = {
-                    dialectsData: dialectsData,
-                    users: users,
-                    loggedIn: localStorage.getItem('loggedIn'),
-                    username: localStorage.getItem('username'),
-                    deviceId: currentDeviceId,
-                    timestamp: new Date().toISOString()
-                };
-                
+                const currentData = getCurrentData();
                 const currentDataString = JSON.stringify(currentData);
                 
                 // إذا لم تتغير البيانات، لا نحتاج للحفظ
@@ -1362,7 +1540,7 @@
                 updateSyncStatus('error');
                 
                 // محاولة استخدام النسخة الاحتياطية
-                await tryBackupSave(currentData);
+                await tryBackupSave(getCurrentData());
             }
         }
 
@@ -1385,27 +1563,6 @@
                 };
             });
             return compressed;
-        }
-
-        // فك ضغط البيانات
-        function decompressDialectsData(compressedData) {
-            const decompressed = {};
-            Object.keys(compressedData).forEach(dialect => {
-                decompressed[dialect] = {
-                    name: compressedData[dialect].name,
-                    terms: compressedData[dialect].terms.map(term => ({
-                        id: term.i,
-                        term: term.t,
-                        meaning: term.m,
-                        dialect: term.d,
-                        category: term.c,
-                        response: term.r,
-                        understanding: term.u,
-                        timestamp: term.ts
-                    }))
-                };
-            });
-            return decompressed;
         }
 
         // حفظ احتياطي محلي
@@ -2138,6 +2295,48 @@
                 return "عذراً، حدث خطأ في الاتصال بالخادم. يرجى التأكد أن السيرفر يعمل.";
             }
         }
+
+        // التحقق من حالة الدخول عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // تهيئة Dark Mode
+            initDarkMode();
+            
+            // توليد معرف فريد للجهاز
+            currentDeviceId = getDeviceId();
+            
+            if (localStorage.getItem('loggedIn') === 'true') {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+            
+            // تحميل البيانات المحلية أولاً
+            loadLocalData();
+            
+            // محاولة تحميل النسخة الاحتياطية إذا كانت البيانات المحلية فارغة
+            if (Object.keys(dialectsData.najdi.terms).length === 0) {
+                loadBackupData();
+            }
+            
+            // إضافة معالج الحدث للنموذج
+            document.getElementById('addTermForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (editingTermId) {
+                    updateTerm();
+                } else {
+                    addNewTerm();
+                }
+            });
+
+            // إضافة مستمعين للحفظ التلقائي
+            setupAutoSave();
+            
+            // محاولة استعادة المسودة المحفوظة
+            restoreDraftOnLoad();
+            
+            // بدء مزامنة السيرفر
+            startServerSync();
+        });
     </script>
 </body>
 </html>
