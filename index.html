@@ -1027,11 +1027,15 @@
             }
         };
 
+        // رابط السيرفر للمزامنة
+        const SERVER_URL = "https://twilight-haze-d33b.abdullahalshehrih5-22a.workers.dev";
+
         // المتغيرات للتحكم في التعديل
         let editingTermId = null;
         let currentDialect = 'najdi';
         let autoSaveTimer = null;
         let hasUnsavedChanges = false;
+        let serverSyncTimer = null;
 
         // التحقق من حالة الدخول عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
@@ -1059,7 +1063,223 @@
             
             // محاولة استعادة المسودة المحفوظة
             restoreDraftOnLoad();
+            
+            // بدء مزامنة السيرفر
+            startServerSync();
         });
+
+        // ========== مزامنة السيرفر ==========
+
+        // استرجاع البيانات المحفوظة من السيرفر
+        async function loadFromServer() {
+            try {
+                console.log("🔄 جاري تحميل البيانات من السيرفر...");
+                const res = await fetch(SERVER_URL);
+                
+                if (!res.ok) {
+                    throw new Error(`خطأ في السيرفر: ${res.status}`);
+                }
+                
+                const data = await res.json();
+                
+                // التحقق من وجود بيانات صالحة
+                if (data && Object.keys(data).length > 0 && 
+                    (data.najdi || data.northern || data.southern)) {
+                    
+                    dialectsData = data;
+                    localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
+                    updateStatistics();
+                    showDialect(currentDialect);
+                    
+                    console.log("✅ تم تحميل البيانات من السيرفر بنجاح");
+                    showNotification('تم تحميل البيانات من السحابة بنجاح', 'success');
+                } else {
+                    console.log("ℹ️ لا توجد بيانات على السيرفر أو البيانات غير صالحة");
+                }
+            } catch (e) {
+                console.warn("⚠️ فشل التحميل من السيرفر:", e.message);
+                // لا نعرض إشعار خطأ هنا لأن التطبيق يمكن أن يعمل بدون اتصال
+            }
+        }
+
+        // حفظ البيانات إلى السيرفر
+        async function saveToServer() {
+            try {
+                console.log("🔄 جاري حفظ البيانات إلى السيرفر...");
+                const res = await fetch(SERVER_URL, {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({ content: dialectsData })
+                });
+                
+                if (!res.ok) {
+                    throw new Error(`خطأ في السيرفر: ${res.status}`);
+                }
+                
+                const result = await res.json();
+                console.log("💾 تم الحفظ إلى السيرفر:", result);
+                
+                // إظهار مؤشر الحفظ بنجاح
+                showServerSyncIndicator();
+                
+            } catch (e) {
+                console.warn("⚠️ فشل الحفظ إلى السيرفر:", e.message);
+                showNotification('فشل في المزامنة مع السحابة', 'error');
+            }
+        }
+
+        // بدء المزامنة التلقائية مع السيرفر
+        function startServerSync() {
+            // تحميل البيانات من السيرفر عند البدء
+            loadFromServer();
+            
+            // الحفظ التلقائي كل 10 ثواني (بدلاً من 5 لتقليل الحمل)
+            serverSyncTimer = setInterval(saveToServer, 10000);
+            
+            // أيضًا حفظ عند إضافة أو تعديل مصطلح
+            document.addEventListener('termChanged', saveToServer);
+        }
+
+        // إظهار مؤشر مزامنة السيرفر
+        function showServerSyncIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'notification success';
+            indicator.textContent = 'تم المزامنة مع السحابة بنجاح';
+            indicator.style.top = '60px'; // أسفل الإشعارات العادية
+            
+            document.body.appendChild(indicator);
+            
+            setTimeout(() => {
+                indicator.remove();
+            }, 2000);
+        }
+
+        // إيقاف المزامنة مع السيرفر
+        function stopServerSync() {
+            if (serverSyncTimer) {
+                clearInterval(serverSyncTimer);
+            }
+            document.removeEventListener('termChanged', saveToServer);
+        }
+
+        // ========== تعديل الوظائف الحالية لدعم المزامنة ==========
+
+        // وظيفة إضافة مصطلح جديد
+        function addNewTerm() {
+            const form = document.getElementById('addTermForm');
+            const formData = new FormData(form);
+            
+            const newTerm = {
+                id: Date.now().toString(),
+                term: formData.get('term'),
+                meaning: formData.get('meaning'),
+                dialect: formData.get('dialect'),
+                category: formData.get('category'),
+                response: formData.get('aiResponse'),
+                understanding: formData.get('understanding')
+            };
+            
+            // إضافة المصطلح إلى البيانات
+            dialectsData[newTerm.dialect].terms.push(newTerm);
+            
+            // حفظ البيانات محلياً
+            saveDialectsData();
+            
+            // تحديث الواجهة
+            updateStatistics();
+            showDialect(currentDialect);
+            
+            // إعادة تعيين النموذج
+            clearForm();
+            
+            // إشعار بتغيير المصطلح للمزامنة
+            document.dispatchEvent(new Event('termChanged'));
+            
+            // إظهار إشعار النجاح
+            showNotification('تم إضافة المصطلح بنجاح', 'success');
+        }
+
+        // وظيفة تحديث مصطلح موجود
+        function updateTerm() {
+            const form = document.getElementById('addTermForm');
+            const formData = new FormData(form);
+            
+            // البحث عن المصطلح وتحديثه
+            const dialect = formData.get('dialect');
+            const termIndex = dialectsData[dialect].terms.findIndex(term => term.id === editingTermId);
+            
+            if (termIndex !== -1) {
+                dialectsData[dialect].terms[termIndex] = {
+                    id: editingTermId,
+                    term: formData.get('term'),
+                    meaning: formData.get('meaning'),
+                    dialect: dialect,
+                    category: formData.get('category'),
+                    response: formData.get('aiResponse'),
+                    understanding: formData.get('understanding')
+                };
+                
+                // حفظ البيانات محلياً
+                saveDialectsData();
+                
+                // تحديث الواجهة
+                updateStatistics();
+                showDialect(currentDialect);
+                
+                // إعادة تعيين النموذج
+                clearForm();
+                
+                // إشعار بتغيير المصطلح للمزامنة
+                document.dispatchEvent(new Event('termChanged'));
+                
+                // إظهار إشعار النجاح
+                showNotification('تم تحديث المصطلح بنجاح', 'success');
+            }
+        }
+
+        // وظيفة حذف مصطلح
+        function deleteTerm(termId, dialect) {
+            if (confirm('هل أنت متأكد من حذف هذا المصطلح؟')) {
+                // البحث عن المصطلح وحذفه
+                dialectsData[dialect].terms = dialectsData[dialect].terms.filter(term => term.id !== termId);
+                
+                // حفظ البيانات محلياً
+                saveDialectsData();
+                
+                // تحديث الواجهة
+                updateStatistics();
+                showDialect(currentDialect);
+                
+                // إشعار بتغيير المصطلح للمزامنة
+                document.dispatchEvent(new Event('termChanged'));
+                
+                // إظهار إشعار النجاح
+                showNotification('تم حذف المصطلح بنجاح', 'success');
+            }
+        }
+
+        // وظيفة حفظ بيانات اللهجات محلياً
+        function saveDialectsData() {
+            localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
+        }
+
+        // وظيفة تحميل بيانات اللهجات محلياً
+        function loadDialectsData() {
+            const savedData = localStorage.getItem('dialectsData');
+            if (savedData) {
+                try {
+                    dialectsData = JSON.parse(savedData);
+                    updateStatistics();
+                } catch (e) {
+                    console.error('خطأ في تحميل البيانات المحلية:', e);
+                }
+            }
+        }
+
+        // ========== وظائف الحفظ التلقائي للمسودات ==========
 
         // إعداد الحفظ التلقائي
         function setupAutoSave() {
@@ -1075,12 +1295,10 @@
 
         // جدولة الحفظ التلقائي
         function scheduleAutoSave() {
-            // إلغاء المؤقت السابق إذا كان موجوداً
             if (autoSaveTimer) {
                 clearTimeout(autoSaveTimer);
             }
             
-            // جدولة الحفظ بعد 2 ثانية من آخر تعديل
             autoSaveTimer = setTimeout(() => {
                 saveDraft();
             }, 2000);
@@ -1099,7 +1317,6 @@
                 understanding: document.getElementById('understanding').value
             };
             
-            // التحقق إذا كان هناك بيانات للحفظ
             const hasData = Object.values(formData).some(value => value.trim() !== '');
             
             if (hasData) {
@@ -1145,98 +1362,22 @@
             }, 2000);
         }
 
-        // وظيفة إضافة مصطلح جديد
-        function addNewTerm() {
-            const form = document.getElementById('addTermForm');
-            const formData = new FormData(form);
+        // وظيفة مسح النموذج
+        function clearForm() {
+            document.getElementById('addTermForm').reset();
+            editingTermId = null;
+            document.getElementById('submitBtn').textContent = 'إضافة المصطلح';
             
-            const newTerm = {
-                id: Date.now().toString(),
-                term: formData.get('term'),
-                meaning: formData.get('meaning'),
-                dialect: formData.get('dialect'),
-                category: formData.get('category'),
-                response: formData.get('aiResponse'),
-                understanding: formData.get('understanding')
-            };
-            
-            // إضافة المصطلح إلى البيانات
-            dialectsData[newTerm.dialect].terms.push(newTerm);
-            
-            // حفظ البيانات
-            saveDialectsData();
-            
-            // تحديث الواجهة
-            updateStatistics();
-            showDialect(currentDialect);
-            
-            // إعادة تعيين النموذج
-            clearForm();
-            
-            // إظهار إشعار النجاح
-            showNotification('تم إضافة المصطلح بنجاح', 'success');
-        }
-
-        // وظيفة تحديث مصطلح موجود
-        function updateTerm() {
-            const form = document.getElementById('addTermForm');
-            const formData = new FormData(form);
-            
-            // البحث عن المصطلح وتحديثه
-            const dialect = formData.get('dialect');
-            const termIndex = dialectsData[dialect].terms.findIndex(term => term.id === editingTermId);
-            
-            if (termIndex !== -1) {
-                dialectsData[dialect].terms[termIndex] = {
-                    id: editingTermId,
-                    term: formData.get('term'),
-                    meaning: formData.get('meaning'),
-                    dialect: dialect,
-                    category: formData.get('category'),
-                    response: formData.get('aiResponse'),
-                    understanding: formData.get('understanding')
-                };
-                
-                // حفظ البيانات
-                saveDialectsData();
-                
-                // تحديث الواجهة
-                updateStatistics();
-                showDialect(currentDialect);
-                
-                // إعادة تعيين النموذج
-                clearForm();
-                
-                // إظهار إشعار النجاح
-                showNotification('تم تحديث المصطلح بنجاح', 'success');
-            }
-        }
-
-        // وظيفة حذف مصطلح
-        function deleteTerm(termId, dialect) {
-            if (confirm('هل أنت متأكد من حذف هذا المصطلح؟')) {
-                // البحث عن المصطلح وحذفه
-                dialectsData[dialect].terms = dialectsData[dialect].terms.filter(term => term.id !== termId);
-                
-                // حفظ البيانات
-                saveDialectsData();
-                
-                // تحديث الواجهة
-                updateStatistics();
-                showDialect(currentDialect);
-                
-                // إظهار إشعار النجاح
-                showNotification('تم حذف المصطلح بنجاح', 'success');
-            }
+            localStorage.removeItem('termDraft');
+            document.getElementById('restoreDraftBtn').style.display = 'none';
+            hasUnsavedChanges = false;
         }
 
         // وظيفة تعديل مصطلح
         function editTerm(termId, dialect) {
-            // البحث عن المصطلح
             const term = dialectsData[dialect].terms.find(term => term.id === termId);
             
             if (term) {
-                // تعبئة النموذج بقيم المصطلح
                 document.getElementById('term').value = term.term;
                 document.getElementById('meaning').value = term.meaning;
                 document.getElementById('dialect').value = term.dialect;
@@ -1244,66 +1385,31 @@
                 document.getElementById('aiResponse').value = term.response;
                 document.getElementById('understanding').value = term.understanding;
                 
-                // تعيين حالة التعديل
                 editingTermId = termId;
-                
-                // تغيير نص زر الإرسال
                 document.getElementById('submitBtn').textContent = 'تحديث المصطلح';
                 
-                // التمرير إلى قسم الإضافة
                 document.querySelector('.add-term-section').scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-
-        // وظيفة مسح النموذج
-        function clearForm() {
-            document.getElementById('addTermForm').reset();
-            editingTermId = null;
-            document.getElementById('submitBtn').textContent = 'إضافة المصطلح';
-            
-            // مسح المسودة المحفوظة
-            localStorage.removeItem('termDraft');
-            document.getElementById('restoreDraftBtn').style.display = 'none';
-            hasUnsavedChanges = false;
-        }
-
-        // وظيفة حفظ بيانات اللهجات
-        function saveDialectsData() {
-            localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
-        }
-
-        // وظيفة تحميل بيانات اللهجات
-        function loadDialectsData() {
-            const savedData = localStorage.getItem('dialectsData');
-            if (savedData) {
-                dialectsData = JSON.parse(savedData);
-                updateStatistics();
             }
         }
 
         // وظيفة تحديث الإحصائيات
         function updateStatistics() {
-            // حساب الإحصائيات العامة
             let totalTerms = 0;
             let totalUnderstood = 0;
             let totalPartial = 0;
             let totalNotUnderstood = 0;
             
-            // حساب إحصائيات كل لهجة
             Object.keys(dialectsData).forEach(dialectKey => {
                 const dialect = dialectsData[dialectKey];
                 const termsCount = dialect.terms.length;
                 
-                // حساب نسبة الفهم
                 const understoodCount = dialect.terms.filter(term => term.understanding === 'understood').length;
                 const partialCount = dialect.terms.filter(term => term.understanding === 'partial').length;
                 const notUnderstoodCount = dialect.terms.filter(term => term.understanding === 'not-understood').length;
                 
-                // حساب نسبة الفهم الإجمالية (مفهوم + نصف فهم جزئي)
                 const understandingPercentage = termsCount > 0 ? 
                     Math.round(((understoodCount + (partialCount * 0.5)) / termsCount) * 100) : 0;
                 
-                // تحديث بطاقة اللهجة
                 const statsElement = document.getElementById(`${dialectKey}Stats`);
                 const progressElement = document.getElementById(`${dialectKey}Progress`);
                 
@@ -1318,21 +1424,18 @@
                     progressElement.style.width = `${understandingPercentage}%`;
                 }
                 
-                // تحديث الإحصائيات العامة
                 totalTerms += termsCount;
                 totalUnderstood += understoodCount;
                 totalPartial += partialCount;
                 totalNotUnderstood += notUnderstoodCount;
             });
             
-            // حساب النسب العامة
             const totalUnderstandingPercentage = totalTerms > 0 ? 
                 Math.round(((totalUnderstood + (totalPartial * 0.5)) / totalTerms) * 100) : 0;
             
             const errorRate = totalTerms > 0 ? 
                 Math.round((totalNotUnderstood / totalTerms) * 100) : 0;
             
-            // تحديث شبكة الإحصائيات
             const statsGrid = document.getElementById('statsGrid');
             statsGrid.innerHTML = `
                 <div class="stat-card">
@@ -1352,13 +1455,11 @@
                 </div>
             `;
             
-            // تحديث المخططات
             updateCharts();
         }
 
         // وظيفة تحديث المخططات
         function updateCharts() {
-            // مخطط توزيع مستوى الفهم
             let understoodCount = 0;
             let partialCount = 0;
             let notUnderstoodCount = 0;
@@ -1392,7 +1493,6 @@
                 `;
             }
             
-            // مخطط مقارنة اللهجات
             const dialectsComparisonChart = document.getElementById('dialectsComparisonChart');
             let comparisonHTML = '<div style="display: flex; flex-direction: column; gap: 15px; height: 100%; justify-content: center;">';
             
@@ -1423,11 +1523,10 @@
             dialectsComparisonChart.innerHTML = comparisonHTML;
         }
 
-        // وظيفة showDialect المعدلة
+        // وظيفة showDialect
         function showDialect(dialectKey) {
             currentDialect = dialectKey;
             
-            // تحديث البطاقات النشطة
             document.querySelectorAll('.dialect-card').forEach(card => {
                 card.classList.remove('active');
             });
@@ -1437,13 +1536,9 @@
             const tableBody = document.getElementById('termsTable');
             const tableTitle = document.getElementById('tableTitle');
             
-            // تحديث عنوان الجدول
             tableTitle.textContent = `المصطلحات ونتائج الفهم - ${dialect.name}`;
-            
-            // تفريغ الجدول
             tableBody.innerHTML = '';
             
-            // التحقق إذا كانت هناك بيانات
             if (dialect.terms.length === 0) {
                 const emptyRow = document.createElement('tr');
                 emptyRow.innerHTML = `
@@ -1453,7 +1548,6 @@
                 `;
                 tableBody.appendChild(emptyRow);
             } else {
-                // ملء الجدول بالبيانات
                 dialect.terms.forEach(term => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -1476,7 +1570,7 @@
             }
         }
 
-        // باقي الوظائف تبقى كما هي
+        // بقية الوظائف تبقى كما هي...
         function getUnderstandingText(level) {
             const levels = {
                 'understood': 'مفهوم',
@@ -1486,7 +1580,7 @@
             return levels[level] || level;
         }
 
-        // وظائف تسجيل الدخول والمحادثة تبقى كما هي
+        // وظائف تسجيل الدخول والمحادثة تبقى كما هي...
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1507,7 +1601,6 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            // التحقق من بيانات المستخدم
             if (users[username] && users[username].password === password) {
                 showNotification('تم تسجيل الدخول بنجاح!', 'success');
                 localStorage.setItem('loggedIn', 'true');
@@ -1529,7 +1622,6 @@
             const password = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
-            // التحقق من صحة البيانات
             if (password !== confirmPassword) {
                 showNotification('كلمات المرور غير متطابقة', 'error');
                 return;
@@ -1540,21 +1632,14 @@
                 return;
             }
             
-            // إنشاء حساب جديد
             users[username] = {
                 password: password,
                 createdAt: new Date().toISOString()
             };
             
-            // حفظ بيانات المستخدمين
             localStorage.setItem('users', JSON.stringify(users));
-            
             showNotification('تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن', 'success');
-            
-            // العودة إلى تسجيل الدخول
             switchTab('login');
-            
-            // مسح حقول التسجيل
             document.getElementById('registerForm').reset();
         });
 
@@ -1565,15 +1650,12 @@
             const username = localStorage.getItem('username') || 'مستخدم';
             document.getElementById('userWelcome').textContent = `مرحباً، ${username}`;
             
-            // عرض بيانات اللهجة النجدية افتراضياً
             showDialect('najdi');
         }
 
         function showLogin() {
             document.getElementById('loginPage').style.display = 'block';
             document.getElementById('dashboardPage').style.display = 'none';
-            
-            // مسح حقول الدخول
             document.getElementById('loginForm').reset();
         }
 
@@ -1585,7 +1667,6 @@
         }
 
         function showNotification(message, type) {
-            // إزالة أي إشعارات سابقة
             const oldNotification = document.querySelector('.notification');
             if (oldNotification) {
                 oldNotification.remove();
@@ -1623,30 +1704,23 @@
             
             if (!message) return;
             
-            // إضافة رسالة المستخدم
             addMessageToChat(message, 'user');
             input.value = '';
             
-            // إظهار مؤشر الكتابة
             document.getElementById('typingIndicator').classList.add('active');
             document.getElementById('sendBtn').disabled = true;
             
             try {
-                // إرسال الرسالة إلى الذكاء الاصطناعي
                 const response = await sendToAI(message);
                 
-                // إخفاء مؤشر الكتابة
                 document.getElementById('typingIndicator').classList.remove('active');
                 document.getElementById('sendBtn').disabled = false;
                 
-                // إضافة رد الذكاء الاصطناعي
                 addMessageToChat(response, 'ai');
             } catch (error) {
-                // إخفاء مؤشر الكتابة
                 document.getElementById('typingIndicator').classList.remove('active');
                 document.getElementById('sendBtn').disabled = false;
                 
-                // إضافة رسالة خطأ
                 addMessageToChat('عذراً، حدث خطأ في الاتصال بالذكاء الاصطناعي. يرجى المحاولة مرة أخرى.', 'ai');
                 console.error('Error communicating with AI:', error);
             }
@@ -1659,7 +1733,6 @@
             messageElement.textContent = message;
             chatMessages.appendChild(messageElement);
             
-            // التمرير إلى الأسفل
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
