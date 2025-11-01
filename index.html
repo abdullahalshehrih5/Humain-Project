@@ -193,6 +193,7 @@
 
         .success { background: var(--success-color); }
         .error { background: var(--accent-color); }
+        .info { background: var(--secondary-color); }
 
         @keyframes slideIn {
             from { transform: translateX(-100%); }
@@ -458,6 +459,29 @@
 
         .restore-draft-btn:hover {
             background: #e67e22;
+        }
+
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--secondary-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            font-size: 12px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sync-status.syncing {
+            background: var(--warning-color);
+        }
+
+        .sync-status.error {
+            background: var(--accent-color);
         }
 
         .dialects-section {
@@ -1226,12 +1250,17 @@
         </div>
     </div>
 
+    <!-- مؤشر حالة المزامنة -->
+    <div class="sync-status" id="syncStatus">
+        <span>🔄 جاري المزامنة...</span>
+    </div>
+
     <script>
         // بيانات المستخدمين (سيتم تخزينها محلياً)
         let users = JSON.parse(localStorage.getItem('users')) || {};
         
         // بيانات اللهجات - سيتم تحميلها من localStorage أو استخدام البيانات الافتراضية
-        let dialectsData = JSON.parse(localStorage.getItem('dialectsData')) || {
+        let dialectsData = {
             najdi: {
                 name: "اللهجة النجدية",
                 terms: []
@@ -1255,7 +1284,8 @@
         let autoSaveTimer = null;
         let hasUnsavedChanges = false;
         let serverSyncTimer = null;
-        let isServerSyncEnabled = false; // إضافة هذا المتغير للتحكم في المزامنة
+        let isServerSyncEnabled = true;
+        let lastServerDataHash = '';
 
         // التحقق من حالة الدخول عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
@@ -1264,9 +1294,6 @@
             } else {
                 showLogin();
             }
-            
-            // تحميل البيانات المحفوظة
-            loadDialectsData();
             
             // إضافة معالج الحدث للنموذج
             document.getElementById('addTermForm').addEventListener('submit', function(e) {
@@ -1318,12 +1345,49 @@
             }
         }
 
-        // ========== مزامنة السيرفر - الإصدار المُصلح ==========
+        // ========== مزامنة السيرفر - الإصدار المُحسّن ==========
+
+        // إنشاء بصمة للبيانات للكشف عن التغييرات
+        function createDataHash(data) {
+            return btoa(JSON.stringify(data)).substring(0, 32);
+        }
+
+        // تحديث حالة المزامنة
+        function updateSyncStatus(status, message) {
+            const syncStatus = document.getElementById('syncStatus');
+            syncStatus.className = 'sync-status';
+            syncStatus.innerHTML = '';
+            
+            switch(status) {
+                case 'syncing':
+                    syncStatus.classList.add('syncing');
+                    syncStatus.innerHTML = '🔄 جاري المزامنة...';
+                    break;
+                case 'success':
+                    syncStatus.innerHTML = '✅ متزامن';
+                    setTimeout(() => {
+                        syncStatus.style.display = 'none';
+                    }, 3000);
+                    break;
+                case 'error':
+                    syncStatus.classList.add('error');
+                    syncStatus.innerHTML = '❌ خطأ في المزامنة';
+                    break;
+                case 'updated':
+                    syncStatus.innerHTML = '📥 تم تحديث البيانات من السيرفر';
+                    setTimeout(() => {
+                        syncStatus.style.display = 'none';
+                    }, 5000);
+                    break;
+            }
+        }
 
         // استرجاع البيانات المحفوظة من السيرفر
         async function loadFromServer() {
             try {
+                updateSyncStatus('syncing');
                 console.log("🔄 جاري تحميل البيانات من السيرفر...");
+                
                 const res = await fetch(SERVER_URL);
                 
                 if (!res.ok) {
@@ -1332,30 +1396,85 @@
                 
                 const data = await res.json();
                 
-                // التحقق من وجود بيانات صالحة - الإصلاح هنا
-                if (data && data.content && Object.keys(data.content).length > 0) {
-                    // استخدام البيانات من السيرفر فقط إذا كانت تحتوي على مصطلحات
-                    const hasValidData = Object.values(data.content).some(dialect => 
-                        dialect.terms && dialect.terms.length > 0
-                    );
+                // التحقق من وجود بيانات صالحة
+                if (data && data.content) {
+                    const serverData = data.content;
+                    const serverHash = createDataHash(serverData);
                     
-                    if (hasValidData) {
-                        dialectsData = data.content;
+                    // إذا كانت البيانات مختلفة عن البيانات المحلية
+                    if (serverHash !== lastServerDataHash) {
+                        // دمج البيانات: نأخذ البيانات من السيرفر ونضيف أي بيانات محلية جديدة
+                        dialectsData = mergeData(dialectsData, serverData);
                         localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
+                        lastServerDataHash = serverHash;
+                        
                         updateStatistics();
                         showDialect(currentDialect);
                         
-                        console.log("✅ تم تحميل البيانات من السيرفر بنجاح");
-                        showNotification('تم تحميل البيانات من السيرفر', 'success');
+                        console.log("✅ تم تحميل وتحديث البيانات من السيرفر");
+                        updateSyncStatus('updated');
+                        showNotification('تم تحديث البيانات من السيرفر', 'info');
                     } else {
-                        console.log("ℹ️ البيانات على السيرفر فارغة، استخدم البيانات المحلية");
+                        console.log("ℹ️ البيانات على السيرفر مطابقة للمحلية");
+                        updateSyncStatus('success');
                     }
                 } else {
-                    console.log("ℹ️ لا توجد بيانات على السيرفر، استخدم البيانات المحلية");
+                    console.log("ℹ️ لا توجد بيانات على السيرفر، استخدام البيانات المحلية");
+                    loadLocalData();
+                    updateSyncStatus('success');
                 }
             } catch (e) {
                 console.warn("⚠️ فشل التحميل من السيرفر:", e.message);
+                loadLocalData();
+                updateSyncStatus('error');
                 showNotification('فشل تحميل البيانات من السيرفر، استخدام البيانات المحلية', 'error');
+            }
+        }
+
+        // دمج البيانات بين المحلية والسيرفر
+        function mergeData(localData, serverData) {
+            const mergedData = { ...serverData };
+            
+            // التأكد من وجود جميع اللهجات
+            ['najdi', 'northern', 'southern'].forEach(dialect => {
+                if (!mergedData[dialect]) {
+                    mergedData[dialect] = { name: localData[dialect]?.name || `اللهجة ${dialect}`, terms: [] };
+                }
+                
+                if (!mergedData[dialect].terms) {
+                    mergedData[dialect].terms = [];
+                }
+            });
+            
+            // دمج المصطلحات - نأخذ المصطلحات من السيرفر ونضيف أي مصطلحات محلية غير موجودة
+            Object.keys(localData).forEach(dialect => {
+                if (localData[dialect] && localData[dialect].terms) {
+                    localData[dialect].terms.forEach(localTerm => {
+                        const existsInServer = mergedData[dialect].terms.some(
+                            serverTerm => serverTerm.id === localTerm.id
+                        );
+                        
+                        if (!existsInServer) {
+                            mergedData[dialect].terms.push(localTerm);
+                        }
+                    });
+                }
+            });
+            
+            return mergedData;
+        }
+
+        // تحميل البيانات المحلية
+        function loadLocalData() {
+            const savedData = localStorage.getItem('dialectsData');
+            if (savedData) {
+                try {
+                    const localData = JSON.parse(savedData);
+                    dialectsData = mergeData(dialectsData, localData);
+                    updateStatistics();
+                } catch (e) {
+                    console.error('خطأ في تحميل البيانات المحلية:', e);
+                }
             }
         }
 
@@ -1364,7 +1483,18 @@
             if (!isServerSyncEnabled) return;
             
             try {
+                updateSyncStatus('syncing');
                 console.log("🔄 جاري حفظ البيانات إلى السيرفر...");
+                
+                const currentHash = createDataHash(dialectsData);
+                
+                // إذا لم تتغير البيانات، لا نحتاج للحفظ
+                if (currentHash === lastServerDataHash) {
+                    console.log("ℹ️ لا توجد تغييرات للحفظ");
+                    updateSyncStatus('success');
+                    return;
+                }
+                
                 const res = await fetch(SERVER_URL, {
                     method: "POST",
                     headers: { 
@@ -1379,10 +1509,13 @@
                 }
                 
                 const result = await res.json();
+                lastServerDataHash = currentHash;
                 console.log("💾 تم الحفظ إلى السيرفر:", result);
+                updateSyncStatus('success');
                 
             } catch (e) {
                 console.warn("⚠️ فشل الحفظ إلى السيرفر:", e.message);
+                updateSyncStatus('error');
             }
         }
 
@@ -1391,20 +1524,19 @@
             // تحميل البيانات من السيرفر عند البدء
             loadFromServer();
             
-            // تفعيل المزامنة بعد التأكد من البيانات
-            setTimeout(() => {
-                isServerSyncEnabled = true;
-                console.log("✅ تم تفعيل مزامنة السيرفر");
-                
-                // الحفظ التلقائي كل 30 ثانية بدلاً من 10
-                serverSyncTimer = setInterval(saveToServer, 30000);
-                
-                // أيضًا حفظ عند إضافة أو تعديل مصطلح
-                document.addEventListener('termChanged', saveToServer);
-            }, 2000);
+            // المزامنة التلقائية كل 10 ثواني
+            serverSyncTimer = setInterval(() => {
+                loadFromServer();
+            }, 10000);
+            
+            // الحفظ التلقائي كل 30 ثانية
+            setInterval(saveToServer, 30000);
+            
+            // أيضًا حفظ عند إضافة أو تعديل مصطلح
+            document.addEventListener('termChanged', saveToServer);
         }
 
-        // ========== تعديل الوظائف الحالية ==========
+        // ========== وظائف إدارة المصطلحات ==========
 
         // وظيفة إضافة مصطلح جديد
         function addNewTerm() {
@@ -1418,7 +1550,8 @@
                 dialect: formData.get('dialect'),
                 category: formData.get('category'),
                 response: formData.get('aiResponse'),
-                understanding: formData.get('understanding')
+                understanding: formData.get('understanding'),
+                timestamp: new Date().toISOString()
             };
             
             // إضافة المصطلح إلى البيانات
@@ -1458,7 +1591,8 @@
                     dialect: dialect,
                     category: formData.get('category'),
                     response: formData.get('aiResponse'),
-                    understanding: formData.get('understanding')
+                    understanding: formData.get('understanding'),
+                    timestamp: new Date().toISOString()
                 };
                 
                 // حفظ البيانات محلياً
@@ -1503,19 +1637,6 @@
         // وظيفة حفظ بيانات اللهجات محلياً
         function saveDialectsData() {
             localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
-        }
-
-        // وظيفة تحميل بيانات اللهجات محلياً
-        function loadDialectsData() {
-            const savedData = localStorage.getItem('dialectsData');
-            if (savedData) {
-                try {
-                    dialectsData = JSON.parse(savedData);
-                    updateStatistics();
-                } catch (e) {
-                    console.error('خطأ في تحميل البيانات المحلية:', e);
-                }
-            }
         }
 
         // ========== وظائف الحفظ التلقائي للمسودات ==========
