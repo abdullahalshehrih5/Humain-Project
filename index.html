@@ -16,6 +16,10 @@
             --white: #ffffff;
             --border-radius: 8px;
             --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --dark-bg: #1a1a1a;
+            --dark-card: #2d2d2d;
+            --dark-text: #e0e0e0;
+            --dark-border: #444;
         }
 
         * {
@@ -23,6 +27,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
         body {
@@ -35,6 +40,11 @@
             direction: rtl;
         }
 
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: var(--dark-text);
+        }
+
         .login-container {
             background: var(--white);
             padding: 40px;
@@ -42,6 +52,11 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 400px;
+        }
+
+        .dark-mode .login-container {
+            background: var(--dark-card);
+            color: var(--dark-text);
         }
 
         .logo {
@@ -55,9 +70,17 @@
             margin-bottom: 10px;
         }
 
+        .dark-mode .logo h1 {
+            color: var(--secondary-color);
+        }
+
         .logo p {
             color: #666;
             font-size: 14px;
+        }
+
+        .dark-mode .logo p {
+            color: #aaa;
         }
 
         .form-group {
@@ -71,6 +94,10 @@
             font-weight: 600;
         }
 
+        .dark-mode .form-group label {
+            color: var(--dark-text);
+        }
+
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 12px;
@@ -78,6 +105,16 @@
             border-radius: var(--border-radius);
             font-size: 16px;
             transition: border-color 0.3s ease;
+            background: var(--white);
+            color: var(--text-color);
+        }
+
+        .dark-mode .form-group input,
+        .dark-mode .form-group select,
+        .dark-mode .form-group textarea {
+            background: #3a3a3a;
+            border-color: #555;
+            color: var(--dark-text);
         }
 
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
@@ -137,6 +174,11 @@
             color: #666;
         }
 
+        .dark-mode .login-info {
+            background: #3a3a3a;
+            color: #aaa;
+        }
+
         .notification {
             position: fixed;
             top: 20px;
@@ -163,6 +205,10 @@
             border-bottom: 1px solid #ddd;
         }
 
+        .dark-mode .tabs {
+            border-bottom-color: #555;
+        }
+
         .tab {
             flex: 1;
             text-align: center;
@@ -176,6 +222,10 @@
             border-bottom: 3px solid var(--secondary-color);
             color: var(--secondary-color);
             font-weight: bold;
+        }
+
+        .dark-mode .tab.active {
+            color: var(--secondary-color);
         }
 
         .tab-content {
@@ -194,6 +244,11 @@
             background-color: var(--light-bg);
         }
 
+        .dark-mode .dashboard {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
         .navbar {
             background: var(--white);
             box-shadow: var(--box-shadow);
@@ -202,6 +257,11 @@
             width: 100%;
             top: 0;
             z-index: 1000;
+        }
+
+        .dark-mode .navbar {
+            background: var(--dark-card);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .nav-container {
@@ -216,6 +276,10 @@
         .nav-logo h1 {
             color: var(--primary-color);
             font-size: 20px;
+        }
+
+        .dark-mode .nav-logo h1 {
+            color: var(--dark-text);
         }
 
         .nav-user {
@@ -239,6 +303,32 @@
             background: #c0392b;
         }
 
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--secondary-color);
+            color: var(--secondary-color);
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .dark-mode .theme-toggle {
+            border-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .dark-mode .theme-toggle:hover {
+            background: var(--warning-color);
+            color: var(--dark-bg);
+        }
+
         .main-content {
             margin-top: 70px;
             padding: 20px;
@@ -256,6 +346,10 @@
             border-radius: var(--border-radius);
             margin-bottom: 30px;
             text-align: center;
+        }
+
+        .dark-mode .welcome-section {
+            background: linear-gradient(135deg, #374151, #4b5563);
         }
 
         .welcome-section h1 {
@@ -279,6 +373,11 @@
             transition: transform 0.3s ease;
         }
 
+        .dark-mode .stat-card {
+            background: var(--dark-card);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
         .stat-card:hover {
             transform: translateY(-5px);
         }
@@ -290,6 +389,10 @@
             margin: 10px 0;
         }
 
+        .dark-mode .stat-number {
+            color: var(--secondary-color);
+        }
+
         .add-term-section {
             background: var(--white);
             padding: 30px;
@@ -297,6 +400,11 @@
             box-shadow: var(--box-shadow);
             margin-bottom: 30px;
             position: relative;
+        }
+
+        .dark-mode .add-term-section {
+            background: var(--dark-card);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
         .form-row {
@@ -360,12 +468,22 @@
             margin-bottom: 30px;
         }
 
+        .dark-mode .dialects-section {
+            background: var(--dark-card);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
         .section-title {
             color: var(--primary-color);
             margin-bottom: 20px;
             font-size: 24px;
             border-bottom: 2px solid var(--secondary-color);
             padding-bottom: 10px;
+        }
+
+        .dark-mode .section-title {
+            color: var(--dark-text);
+            border-bottom-color: var(--secondary-color);
         }
 
         .dialects-grid {
@@ -383,10 +501,19 @@
             background: var(--white);
         }
 
+        .dark-mode .dialect-card {
+            background: var(--dark-card);
+            border-color: #555;
+        }
+
         .dialect-card:hover {
             transform: translateY(-5px);
             border-color: var(--secondary-color);
             box-shadow: var(--box-shadow);
+        }
+
+        .dark-mode .dialect-card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
         .dialect-card.active {
@@ -394,9 +521,18 @@
             background: #e3f2fd;
         }
 
+        .dark-mode .dialect-card.active {
+            background: #1e3a5f;
+            border-color: var(--secondary-color);
+        }
+
         .dialect-card h3 {
             color: var(--primary-color);
             margin-bottom: 10px;
+        }
+
+        .dark-mode .dialect-card h3 {
+            color: var(--dark-text);
         }
 
         .dialect-stats {
@@ -407,6 +543,10 @@
             border-top: 1px solid #eee;
         }
 
+        .dark-mode .dialect-stats {
+            border-top-color: #555;
+        }
+
         .dialect-stats span {
             background: var(--light-bg);
             padding: 5px 10px;
@@ -415,12 +555,22 @@
             font-weight: 600;
         }
 
+        .dark-mode .dialect-stats span {
+            background: #3a3a3a;
+            color: var(--dark-text);
+        }
+
         .terms-table {
             background: var(--white);
             padding: 30px;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             margin-bottom: 30px;
+        }
+
+        .dark-mode .terms-table {
+            background: var(--dark-card);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
         .table-container {
@@ -440,6 +590,11 @@
             border-bottom: 1px solid #eee;
         }
 
+        .dark-mode th, .dark-mode td {
+            border-bottom-color: #555;
+            color: var(--dark-text);
+        }
+
         th {
             background: var(--light-bg);
             color: var(--primary-color);
@@ -448,8 +603,17 @@
             top: 0;
         }
 
+        .dark-mode th {
+            background: #3a3a3a;
+            color: var(--dark-text);
+        }
+
         tr:hover {
             background: #f8f9fa;
+        }
+
+        .dark-mode tr:hover {
+            background: #3a3a3a;
         }
 
         .understanding-badge {
@@ -504,6 +668,11 @@
             margin-bottom: 30px;
         }
 
+        .dark-mode .charts-section {
+            background: var(--dark-card);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -516,6 +685,11 @@
             padding: 20px;
             border-radius: var(--border-radius);
             border: 1px solid #ddd;
+        }
+
+        .dark-mode .chart-card {
+            background: #3a3a3a;
+            border-color: #555;
         }
 
         .chart-placeholder {
@@ -533,6 +707,12 @@
             line-height: 1.6;
         }
 
+        .dark-mode .chart-placeholder {
+            background: #2d2d2d;
+            color: #aaa;
+            border-color: #555;
+        }
+
         .progress-bar {
             width: 100%;
             height: 20px;
@@ -540,6 +720,10 @@
             border-radius: 10px;
             overflow: hidden;
             margin: 10px 0;
+        }
+
+        .dark-mode .progress-bar {
+            background: #3a3a3a;
         }
 
         .progress-fill {
@@ -557,6 +741,10 @@
             padding: 40px;
             color: #666;
             font-size: 16px;
+        }
+
+        .dark-mode .empty-table-message {
+            color: #aaa;
         }
 
         /* Chat Modal Styles */
@@ -588,6 +776,10 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
+        .dark-mode .chat-container {
+            background: var(--dark-card);
+        }
+
         .chat-header {
             padding: 20px;
             border-bottom: 1px solid #eee;
@@ -597,6 +789,11 @@
             background: var(--primary-color);
             color: var(--white);
             border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .dark-mode .chat-header {
+            background: #374151;
+            border-bottom-color: #555;
         }
 
         .chat-header h3 {
@@ -641,11 +838,20 @@
             border-bottom-left-radius: 4px;
         }
 
+        .dark-mode .ai-message {
+            background: #3a3a3a;
+            color: var(--dark-text);
+        }
+
         .chat-input {
             padding: 20px;
             border-top: 1px solid #eee;
             display: flex;
             gap: 10px;
+        }
+
+        .dark-mode .chat-input {
+            border-top-color: #555;
         }
 
         .chat-input input {
@@ -654,6 +860,14 @@
             border: 2px solid #ddd;
             border-radius: var(--border-radius);
             font-size: 16px;
+            background: var(--white);
+            color: var(--text-color);
+        }
+
+        .dark-mode .chat-input input {
+            background: #3a3a3a;
+            border-color: #555;
+            color: var(--dark-text);
         }
 
         .chat-input button {
@@ -700,6 +914,11 @@
             border-radius: 18px;
             border-bottom-left-radius: 4px;
             font-style: italic;
+        }
+
+        .dark-mode .typing-indicator {
+            background: #3a3a3a;
+            color: #aaa;
         }
 
         .typing-indicator.active {
@@ -806,6 +1025,7 @@
                 <div class="nav-user">
                     <span id="userWelcome">مرحباً، مدير النظام</span>
                     <button class="ai-chat-btn" onclick="openChat()">محادثة مع الذكاء الاصطناعي</button>
+                    <button class="theme-toggle" id="themeToggle">🌙 وضع الليل</button>
                     <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
                 </div>
             </div>
@@ -883,7 +1103,6 @@
                             </div>
                         </div>
                         <div class="form-actions">
-                            <button type="button" class="btn btn-warning" onclick="clearForm()">مسح النموذج</button>
                             <button type="button" class="restore-draft-btn" id="restoreDraftBtn" style="display:none;" onclick="restoreDraft()">استعادة المسودة</button>
                             <button type="submit" class="btn btn-success" id="submitBtn">إضافة المصطلح</button>
                         </div>
@@ -1066,7 +1285,37 @@
             
             // بدء مزامنة السيرفر
             startServerSync();
+
+            // تهيئة وضع الدارك مود
+            initDarkMode();
         });
+
+        // ========== وضع الدارك مود ==========
+
+        function initDarkMode() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').textContent = '☀️ وضع النهار';
+            }
+
+            document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
+        }
+
+        function toggleDarkMode() {
+            const body = document.body;
+            const themeToggle = document.getElementById('themeToggle');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                themeToggle.textContent = '☀️ وضع النهار';
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                themeToggle.textContent = '🌙 وضع الليل';
+                localStorage.setItem('darkMode', 'false');
+            }
+        }
 
         // ========== مزامنة السيرفر ==========
 
@@ -1092,13 +1341,11 @@
                     showDialect(currentDialect);
                     
                     console.log("✅ تم تحميل البيانات من السيرفر بنجاح");
-                    showNotification('تم تحميل البيانات من السحابة بنجاح', 'success');
                 } else {
                     console.log("ℹ️ لا توجد بيانات على السيرفر أو البيانات غير صالحة");
                 }
             } catch (e) {
                 console.warn("⚠️ فشل التحميل من السيرفر:", e.message);
-                // لا نعرض إشعار خطأ هنا لأن التطبيق يمكن أن يعمل بدون اتصال
             }
         }
 
@@ -1122,12 +1369,8 @@
                 const result = await res.json();
                 console.log("💾 تم الحفظ إلى السيرفر:", result);
                 
-                // إظهار مؤشر الحفظ بنجاح
-                showServerSyncIndicator();
-                
             } catch (e) {
                 console.warn("⚠️ فشل الحفظ إلى السيرفر:", e.message);
-                showNotification('فشل في المزامنة مع السحابة', 'error');
             }
         }
 
@@ -1136,36 +1379,14 @@
             // تحميل البيانات من السيرفر عند البدء
             loadFromServer();
             
-            // الحفظ التلقائي كل 10 ثواني (بدلاً من 5 لتقليل الحمل)
+            // الحفظ التلقائي كل 10 ثواني
             serverSyncTimer = setInterval(saveToServer, 10000);
             
             // أيضًا حفظ عند إضافة أو تعديل مصطلح
             document.addEventListener('termChanged', saveToServer);
         }
 
-        // إظهار مؤشر مزامنة السيرفر
-        function showServerSyncIndicator() {
-            const indicator = document.createElement('div');
-            indicator.className = 'notification success';
-            indicator.textContent = 'تم المزامنة مع السحابة بنجاح';
-            indicator.style.top = '60px'; // أسفل الإشعارات العادية
-            
-            document.body.appendChild(indicator);
-            
-            setTimeout(() => {
-                indicator.remove();
-            }, 2000);
-        }
-
-        // إيقاف المزامنة مع السيرفر
-        function stopServerSync() {
-            if (serverSyncTimer) {
-                clearInterval(serverSyncTimer);
-            }
-            document.removeEventListener('termChanged', saveToServer);
-        }
-
-        // ========== تعديل الوظائف الحالية لدعم المزامنة ==========
+        // ========== تعديل الوظائف الحالية ==========
 
         // وظيفة إضافة مصطلح جديد
         function addNewTerm() {
