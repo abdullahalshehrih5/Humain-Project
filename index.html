@@ -749,6 +749,25 @@
             gap: 8px;
         }
 
+        .device-sync-info {
+            position: fixed;
+            bottom: 90px;
+            left: 20px;
+            background: #9b59b6;
+            color: white;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            font-size: 11px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .device-sync-info.show {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         @media (max-width: 768px) {
             .charts-grid {
                 grid-template-columns: 1fr;
@@ -1060,6 +1079,11 @@
         <span>📦 استخدام النسخة الاحتياطية</span>
     </div>
 
+    <!-- معلومات مزامنة الأجهزة -->
+    <div class="device-sync-info" id="deviceSyncInfo">
+        <span>📱 مزامنة بين الأجهزة</span>
+    </div>
+
     <script>
         // بيانات المستخدمين (سيتم تخزينها محلياً)
         let users = JSON.parse(localStorage.getItem('users')) || {};
@@ -1092,6 +1116,7 @@
         let isServerSyncEnabled = true;
         let lastSyncData = '';
         let isUsingBackup = false;
+        let currentDeviceId = '';
 
         // التحقق من حالة الدخول عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
@@ -1100,6 +1125,9 @@
             } else {
                 showLogin();
             }
+            
+            // توليد معرف فريد للجهاز
+            currentDeviceId = getDeviceId();
             
             // تحميل البيانات المحلية أولاً
             loadLocalData();
@@ -1128,6 +1156,106 @@
             // بدء مزامنة السيرفر
             startServerSync();
         });
+
+        // ========== نظام المزامنة بين الأجهزة ==========
+
+        // توليد معرف فريد للجهاز
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('deviceId');
+            if (!deviceId) {
+                deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('deviceId', deviceId);
+            }
+            return deviceId;
+        }
+
+        // نظام المزامنة المحسن بين الأجهزة
+        async function syncDataBetweenDevices() {
+            try {
+                console.log("🔄 بدء مزامنة البيانات بين الأجهزة...");
+                
+                const currentData = {
+                    dialectsData: dialectsData,
+                    users: users,
+                    loggedIn: localStorage.getItem('loggedIn'),
+                    username: localStorage.getItem('username'),
+                    deviceId: currentDeviceId,
+                    timestamp: new Date().toISOString()
+                };
+
+                // محاولة الحصول على أحدث بيانات من السيرفر
+                const serverData = await getServerData();
+                
+                if (serverData && serverData.timestamp) {
+                    const serverTime = new Date(serverData.timestamp).getTime();
+                    const localTime = new Date(currentData.timestamp).getTime();
+                    
+                    // استخدام البيانات الأحدث
+                    if (serverTime > localTime) {
+                        console.log("📥 استخدام البيانات من السيرفر (أحدث)");
+                        showDeviceSyncInfo('تم تحديث البيانات من جهاز آخر');
+                        applyServerData(serverData);
+                    } else {
+                        console.log("📤 رفع البيانات المحلية إلى السيرفر (أحدث)");
+                        showDeviceSyncInfo('جاري مزامنة البيانات مع الأجهزة الأخرى');
+                        await saveToServer();
+                    }
+                } else {
+                    // لا توجد بيانات على السيرفر، رفع البيانات المحلية
+                    console.log("📤 رفع البيانات المحلية إلى السيرفر (أول مرة)");
+                    showDeviceSyncInfo('جاري رفع البيانات للسيرفر');
+                    await saveToServer();
+                }
+                
+            } catch (error) {
+                console.error("❌ فشل مزامنة البيانات بين الأجهزة:", error);
+                showDeviceSyncInfo('فشل المزامنة بين الأجهزة');
+            }
+        }
+
+        // الحصول على البيانات من السيرفر
+        async function getServerData() {
+            try {
+                const response = await fetch(SERVER_URL);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.content;
+                }
+            } catch (error) {
+                console.warn("⚠️ فشل جلب البيانات من السيرفر:", error);
+            }
+            return null;
+        }
+
+        // تطبيق البيانات من السيرفر
+        function applyServerData(serverData) {
+            if (serverData.dialectsData) {
+                dialectsData = serverData.dialectsData;
+                saveDialectsData();
+                updateStatistics();
+                showDialect(currentDialect);
+                
+                // تحديث بيانات المستخدمين
+                if (serverData.users) {
+                    users = serverData.users;
+                    localStorage.setItem('users', JSON.stringify(users));
+                }
+                
+                console.log("✅ تم تطبيق البيانات من السيرفر");
+                showNotification('تم تحديث البيانات من الأجهزة الأخرى', 'success');
+            }
+        }
+
+        // عرض معلومات مزامنة الأجهزة
+        function showDeviceSyncInfo(message) {
+            const deviceInfo = document.getElementById('deviceSyncInfo');
+            deviceInfo.innerHTML = `<span>📱 ${message}</span>`;
+            deviceInfo.classList.add('show');
+            
+            setTimeout(() => {
+                deviceInfo.classList.remove('show');
+            }, 5000);
+        }
 
         // ========== نظام المزامنة المُحسّن مع النسخ الاحتياطي ==========
 
@@ -1180,6 +1308,7 @@
                     users: users,
                     loggedIn: localStorage.getItem('loggedIn'),
                     username: localStorage.getItem('username'),
+                    deviceId: currentDeviceId,
                     timestamp: new Date().toISOString()
                 };
                 
@@ -1208,7 +1337,8 @@
                     body: JSON.stringify({ 
                         action: "save",
                         content: currentData,
-                        timestamp: new Date().toISOString()
+                        timestamp: new Date().toISOString(),
+                        deviceId: currentDeviceId
                     })
                 });
                 
@@ -1249,7 +1379,8 @@
                         d: term.dialect,
                         c: term.category,
                         r: term.response,
-                        u: term.understanding
+                        u: term.understanding,
+                        ts: term.timestamp
                     }))
                 };
             });
@@ -1269,7 +1400,8 @@
                         dialect: term.d,
                         category: term.c,
                         response: term.r,
-                        understanding: term.u
+                        understanding: term.u,
+                        timestamp: term.ts
                     }))
                 };
             });
@@ -1392,17 +1524,20 @@
                 loadFromServer();
             }, 2000);
             
-            // المزامنة التلقائية كل 15 ثانية
+            // المزامنة التلقائية كل 10 ثواني
             serverSyncTimer = setInterval(() => {
-                loadFromServer();
-            }, 15000);
+                syncDataBetweenDevices();
+            }, 10000);
             
             // الحفظ التلقائي كل 30 ثانية
             setInterval(saveToServer, 30000);
             
             // أيضًا حفظ عند إضافة أو تعديل مصطلح
             document.addEventListener('termChanged', function() {
-                setTimeout(saveToServer, 1000);
+                setTimeout(() => {
+                    saveToServer();
+                    syncDataBetweenDevices();
+                }, 1000);
             });
         }
 
@@ -1421,7 +1556,8 @@
                 category: formData.get('category'),
                 response: formData.get('aiResponse'),
                 understanding: formData.get('understanding'),
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                deviceId: currentDeviceId
             };
             
             // إضافة المصطلح إلى البيانات
@@ -1462,7 +1598,8 @@
                     category: formData.get('category'),
                     response: formData.get('aiResponse'),
                     understanding: formData.get('understanding'),
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    deviceId: currentDeviceId
                 };
                 
                 // حفظ البيانات محلياً
