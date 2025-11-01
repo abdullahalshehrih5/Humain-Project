@@ -3,9 +3,8 @@ main = "worker.js"
 compatibility_date = "2025-11-01"
 
 kv_namespaces = [
-  { binding = "HUMAIN-DATA", id = "979fdfba036443c484c86f543106e88a" }
+  { binding = "HUMAIN_DATA", id = "979fdfba036443c484c86f543106e88a" }
 ]
 
-[[migrations]]
-tag = "v1"
-new_classes = ["HumainDataObject"]
+[vars]
+OPENAI_API_KEY = "your-openai-api-key-here"
