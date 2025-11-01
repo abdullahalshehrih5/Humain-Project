@@ -1255,6 +1255,7 @@
         let autoSaveTimer = null;
         let hasUnsavedChanges = false;
         let serverSyncTimer = null;
+        let isServerSyncEnabled = false; // إضافة هذا المتغير للتحكم في المزامنة
 
         // التحقق من حالة الدخول عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
@@ -1317,7 +1318,7 @@
             }
         }
 
-        // ========== مزامنة السيرفر ==========
+        // ========== مزامنة السيرفر - الإصدار المُصلح ==========
 
         // استرجاع البيانات المحفوظة من السيرفر
         async function loadFromServer() {
@@ -1331,26 +1332,37 @@
                 
                 const data = await res.json();
                 
-                // التحقق من وجود بيانات صالحة
-                if (data && Object.keys(data).length > 0 && 
-                    (data.najdi || data.northern || data.southern)) {
+                // التحقق من وجود بيانات صالحة - الإصلاح هنا
+                if (data && data.content && Object.keys(data.content).length > 0) {
+                    // استخدام البيانات من السيرفر فقط إذا كانت تحتوي على مصطلحات
+                    const hasValidData = Object.values(data.content).some(dialect => 
+                        dialect.terms && dialect.terms.length > 0
+                    );
                     
-                    dialectsData = data;
-                    localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
-                    updateStatistics();
-                    showDialect(currentDialect);
-                    
-                    console.log("✅ تم تحميل البيانات من السيرفر بنجاح");
+                    if (hasValidData) {
+                        dialectsData = data.content;
+                        localStorage.setItem('dialectsData', JSON.stringify(dialectsData));
+                        updateStatistics();
+                        showDialect(currentDialect);
+                        
+                        console.log("✅ تم تحميل البيانات من السيرفر بنجاح");
+                        showNotification('تم تحميل البيانات من السيرفر', 'success');
+                    } else {
+                        console.log("ℹ️ البيانات على السيرفر فارغة، استخدم البيانات المحلية");
+                    }
                 } else {
-                    console.log("ℹ️ لا توجد بيانات على السيرفر أو البيانات غير صالحة");
+                    console.log("ℹ️ لا توجد بيانات على السيرفر، استخدم البيانات المحلية");
                 }
             } catch (e) {
                 console.warn("⚠️ فشل التحميل من السيرفر:", e.message);
+                showNotification('فشل تحميل البيانات من السيرفر، استخدام البيانات المحلية', 'error');
             }
         }
 
         // حفظ البيانات إلى السيرفر
         async function saveToServer() {
+            if (!isServerSyncEnabled) return;
+            
             try {
                 console.log("🔄 جاري حفظ البيانات إلى السيرفر...");
                 const res = await fetch(SERVER_URL, {
@@ -1379,11 +1391,17 @@
             // تحميل البيانات من السيرفر عند البدء
             loadFromServer();
             
-            // الحفظ التلقائي كل 10 ثواني
-            serverSyncTimer = setInterval(saveToServer, 10000);
-            
-            // أيضًا حفظ عند إضافة أو تعديل مصطلح
-            document.addEventListener('termChanged', saveToServer);
+            // تفعيل المزامنة بعد التأكد من البيانات
+            setTimeout(() => {
+                isServerSyncEnabled = true;
+                console.log("✅ تم تفعيل مزامنة السيرفر");
+                
+                // الحفظ التلقائي كل 30 ثانية بدلاً من 10
+                serverSyncTimer = setInterval(saveToServer, 30000);
+                
+                // أيضًا حفظ عند إضافة أو تعديل مصطلح
+                document.addEventListener('termChanged', saveToServer);
+            }, 2000);
         }
 
         // ========== تعديل الوظائف الحالية ==========
@@ -1791,7 +1809,6 @@
             }
         }
 
-        // بقية الوظائف تبقى كما هي...
         function getUnderstandingText(level) {
             const levels = {
                 'understood': 'مفهوم',
@@ -1801,7 +1818,6 @@
             return levels[level] || level;
         }
 
-        // وظائف تسجيل الدخول والمحادثة تبقى كما هي...
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
