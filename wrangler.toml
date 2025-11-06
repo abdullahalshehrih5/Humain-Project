@@ -7,4 +7,4 @@ kv_namespaces = [
 ]
 
 [vars]
-OPENAI_API_KEY = "your-openai-api-key-here"
+OPENAI_API_KEY = "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"
